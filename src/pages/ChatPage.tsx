@@ -28,7 +28,6 @@ export default function ChatPage() {
   const [loadError, setLoadError] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const otherRole = role === "initiator" ? "responder" : "initiator";
 
   useEffect(() => {
     const socket = io();
@@ -107,21 +106,25 @@ export default function ChatPage() {
     socketRef.current.emit(myWantEnd ? "cancel-end" : "request-end", { sessionId, role });
   };
 
+  /* ── Loading ── */
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-500">连接中…</p>
+        <p style={{ color: "var(--c-text-secondary)" }}>连接中…</p>
       </div>
     );
   }
 
+  /* ── Error ── */
+
   if (loadError) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-4">
-        <p className="text-red-600 mb-4">连接失败，请检查网络</p>
+        <p className="mb-4" style={{ color: "var(--c-danger)" }}>连接失败，请检查网络</p>
         <button
           onClick={() => window.location.reload()}
-          className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700"
+          className="clay-btn clay-btn-primary px-6 py-3 text-sm"
         >
           重试
         </button>
@@ -131,17 +134,17 @@ export default function ChatPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
+
       {/* Header */}
-      <div className="border-b border-gray-200 bg-white px-4 py-3">
+      <div className="clay-card px-4 py-3 mx-3 mt-3"
+           style={{ borderRadius: "var(--r-card)", marginBottom: 0 }}>
         <div className="mx-auto flex max-w-lg items-center justify-between">
           <div>
-            <h1 className="text-lg font-bold">自由对话</h1>
-            <p className="text-xs text-gray-400">第四阶段 · 把话说清楚</p>
+            <h1 className="text-lg font-bold" style={{ color: "var(--c-text)" }}>自由对话</h1>
+            <p className="text-xs" style={{ color: "var(--c-text-muted)" }}>第四阶段 · 把话说清楚</p>
           </div>
           {otherWantEnd && (
-            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
-              对方想结束对话
-            </span>
+            <span className="badge-warning">对方想结束对话</span>
           )}
         </div>
       </div>
@@ -150,7 +153,7 @@ export default function ChatPage() {
       <div className="flex-1 overflow-y-auto px-4 py-4">
         <div className="mx-auto max-w-lg space-y-3">
           {messages.length === 0 && (
-            <p className="text-center text-sm text-gray-400 py-12">
+            <p className="text-center text-sm py-12" style={{ color: "var(--c-text-muted)" }}>
               帮帮团已经完成了分析。现在请坦诚地交谈吧。
             </p>
           )}
@@ -161,7 +164,7 @@ export default function ChatPage() {
             if (isJudge) {
               return (
                 <div key={msg.id} className="flex justify-center">
-                  <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 max-w-[85%] text-sm text-amber-800">
+                  <div className="chat-bubble-judge max-w-[85%] text-sm">
                     {msg.content}
                   </div>
                 </div>
@@ -170,15 +173,11 @@ export default function ChatPage() {
 
             return (
               <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
-                    isMine
-                      ? "bg-blue-600 text-white rounded-br-md"
-                      : "bg-gray-100 text-gray-800 rounded-bl-md"
-                  }`}
-                >
-                  <p className="whitespace-pre-wrap">{msg.content}</p>
-                  <p className={`mt-0.5 text-xs ${isMine ? "text-blue-200" : "text-gray-400"}`}>
+                <div className={`max-w-[75%] text-sm ${isMine ? "chat-bubble-mine" : "chat-bubble-other"}`}>
+                  <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                  <p className={`mt-0.5 text-xs ${
+                    isMine ? "opacity-60" : ""
+                  }`} style={!isMine ? { color: "var(--c-text-muted)" } : undefined}>
                     {new Date(msg.createdAt).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}
                   </p>
                 </div>
@@ -190,7 +189,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input area */}
-      <div className="border-t border-gray-200 bg-white px-4 py-3 pb-[env(safe-area-inset-bottom,0px)]">
+      <div className="px-4 py-3 pb-[env(safe-area-inset-bottom,12px)]">
         <div className="mx-auto max-w-lg">
           <div className="flex items-end gap-2">
             <textarea
@@ -198,32 +197,30 @@ export default function ChatPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="说说你想说的话…"
-              className="flex-1 rounded-xl border border-gray-300 px-3 py-2.5 text-sm resize-none min-h-[40px] max-h-[120px]"
+              className="clay-input resize-none min-h-[40px] max-h-[120px]"
               rows={1}
+              style={{ flex: 1 }}
             />
             <button
               onClick={sendMessage}
               disabled={!input.trim()}
-              className="rounded-xl bg-blue-600 px-3 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40 transition shrink-0"
+              className="clay-btn clay-btn-primary px-3 py-2.5 text-sm shrink-0"
             >
               发送
             </button>
           </div>
 
-          {/* End conversation action */}
+          {/* End conversation */}
           <div className="mt-2 text-center">
             <button
               onClick={requestEnd}
-              className={`text-xs font-medium transition ${
-                myWantEnd
-                  ? "text-amber-600"
-                  : "text-gray-400 hover:text-gray-600"
-              }`}
+              className="text-xs font-medium transition"
+              style={{ color: myWantEnd ? "var(--c-warning)" : "var(--c-text-muted)" }}
             >
               {myWantEnd ? "已请求结束（点击取消）" : "我们都讲完了，请帮帮团生成结语"}
             </button>
             {myWantEnd && (
-              <span className="ml-2 text-xs text-gray-400">
+              <span className="ml-2 text-xs" style={{ color: "var(--c-text-muted)" }}>
                 {otherWantEnd ? "" : "（1/2）"}
               </span>
             )}

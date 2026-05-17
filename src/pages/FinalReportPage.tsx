@@ -24,7 +24,6 @@ export default function FinalReportPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const [searchParams] = useSearchParams();
   const role = searchParams.get("role") || "initiator";
-  const mode = searchParams.get("mode") || "parenting";
   const [data, setData] = useState<SessionData | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -65,13 +64,15 @@ export default function FinalReportPage() {
     };
   }, [sessionId]);
 
+  /* ── Error ── */
+
   if (loadError && !data) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-4">
-        <p className="text-red-600 mb-4">加载失败，请检查网络</p>
+        <p className="mb-4" style={{ color: "var(--c-danger)" }}>加载失败，请检查网络</p>
         <button
           onClick={() => { setLoadError(false); failCountRef.current = 0; }}
-          className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700"
+          className="clay-btn clay-btn-primary px-6 py-3 text-sm"
         >
           重试
         </button>
@@ -79,104 +80,116 @@ export default function FinalReportPage() {
     );
   }
 
+  /* ── Loading ── */
+
   if (!data) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-500">加载中…</p>
+        <p style={{ color: "var(--c-text-secondary)" }}>加载中…</p>
       </div>
     );
   }
 
   const report = data.session.finalReport;
   const isGenerating = !report || data.session.phase === "generating";
+  const mode = data.session.mode;
+
+  /* ── Generating ── */
 
   if (isGenerating) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-4">
-        <div className="animate-spin h-10 w-10 border-4 border-blue-200 border-t-blue-600 rounded-full mb-4" />
-        <h1 className="text-xl font-bold">帮帮团正在生成结语</h1>
-        <p className="mt-2 text-gray-500 text-center">请稍候片刻…</p>
+        <div className="spinner mb-6" />
+        <h1 className="text-xl font-bold" style={{ color: "var(--c-text)" }}>帮帮团正在生成结语</h1>
+        <p className="mt-2 text-sm text-center" style={{ color: "var(--c-text-secondary)" }}>请稍候片刻…</p>
       </div>
     );
   }
 
   return (
     <div className="flex min-h-screen flex-col px-4 py-8">
-      <div className="mx-auto w-full max-w-lg">
+      <div className="mx-auto w-full max-w-lg anim-fade-in">
+
+        {/* Header */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-green-600">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full"
+               style={{ background: "var(--c-success-light)" }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 strokeWidth="2" strokeLinecap="round" style={{ color: "var(--c-success)" }}>
               <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" />
               <path d="m9 12 2 2 4-4" />
             </svg>
           </div>
-          <span className="text-sm font-medium text-green-600">最终结语</span>
-          <h1 className="mt-2 text-2xl font-bold">帮帮团的综合意见</h1>
-          <p className="mt-1 text-gray-500">这是帮帮团给你们的最终建议</p>
+          <span className="badge-success">最终结语</span>
+          <h1 className="mt-3 text-2xl font-bold" style={{ color: "var(--c-text)" }}>帮帮团的综合意见</h1>
+          <p className="mt-1.5 text-sm" style={{ color: "var(--c-text-secondary)" }}>这是帮帮团给你们的最终建议</p>
         </div>
 
+        {/* Report cards */}
         <div className="space-y-4 mb-8">
+
           {/* Holmes: Discrepancy Confirmation */}
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
+          <div className="clay-card p-5">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">🔍</span>
-              <h2 className="font-semibold text-gray-800">事实分歧确认</h2>
-              <span className="text-xs text-gray-400">夏洛克·福尔摩斯</span>
+              <span className="text-lg select-none">🔍</span>
+              <h2 className="font-semibold text-base" style={{ color: "var(--c-text)" }}>事实分歧确认</h2>
+              <span className="text-xs" style={{ color: "var(--c-text-muted)" }}>夏洛克·福尔摩斯</span>
             </div>
-            <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{report.holmes}</p>
+            <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--c-text-secondary)" }}>{report.holmes}</p>
           </div>
 
           {/* Munger: Responsibility */}
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
+          <div className="clay-card p-5">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">⚖️</span>
-              <h2 className="font-semibold text-gray-800">责任裁定</h2>
-              <span className="text-xs text-gray-400">查理·芒格</span>
+              <span className="text-lg select-none">⚖️</span>
+              <h2 className="font-semibold text-base" style={{ color: "var(--c-text)" }}>责任裁定</h2>
+              <span className="text-xs" style={{ color: "var(--c-text-muted)" }}>查理·芒格</span>
             </div>
-            <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{report.mungerResponsibility}</p>
+            <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--c-text-secondary)" }}>{report.mungerResponsibility}</p>
           </div>
 
           {/* Conflict resolver: Common Ground */}
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
+          <div className="clay-card p-5">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">🤝</span>
-              <h2 className="font-semibold text-gray-800">共同出发点</h2>
-              <span className="text-xs text-gray-400">{mode === "parenting" ? "鲁道夫·德雷克斯" : "卡尔·罗杰斯"}</span>
+              <span className="text-lg select-none">🤝</span>
+              <h2 className="font-semibold text-base" style={{ color: "var(--c-text)" }}>共同出发点</h2>
+              <span className="text-xs" style={{ color: "var(--c-text-muted)" }}>{mode === "parenting" ? "鲁道夫·德雷克斯" : "卡尔·罗杰斯"}</span>
             </div>
-            <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{report.conflictCommon}</p>
+            <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--c-text-secondary)" }}>{report.conflictCommon}</p>
           </div>
 
           {/* Munger: Action Suggestions */}
-          <div className="rounded-xl border border-blue-200 bg-blue-50 p-5">
+          <div className="clay-card p-5"
+               style={{ background: "var(--c-primary-light)", borderColor: "var(--c-primary-border)" }}>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">💡</span>
-              <h2 className="font-semibold text-blue-800">双向行动建议</h2>
-              <span className="text-xs text-blue-500">查理·芒格</span>
+              <span className="text-lg select-none">💡</span>
+              <h2 className="font-semibold text-base" style={{ color: "#5A7DB3" }}>双向行动建议</h2>
+              <span className="text-xs" style={{ color: "var(--c-primary)" }}>查理·芒格</span>
             </div>
-            <p className="text-sm text-blue-800 whitespace-pre-wrap leading-relaxed">{report.mungerActions}</p>
+            <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "#5A7DB3" }}>{report.mungerActions}</p>
           </div>
         </div>
 
-        {/* Actions */}
+        {/* Action buttons */}
         <div className="space-y-3 mb-8">
-          <p className="text-sm font-medium text-gray-500">接下来你可以：</p>
+          <p className="text-sm font-medium" style={{ color: "var(--c-text-muted)" }}>接下来你可以：</p>
 
           <button
             onClick={() => {
-              const text = reportText(report, data.session.mode);
+              const text = reportText(report, mode);
               navigator.clipboard.writeText(text).then(() => {
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
               });
             }}
-            className="w-full rounded-xl bg-white border border-gray-300 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            className="clay-btn clay-btn-secondary w-full py-3 text-sm"
           >
             {copied ? "已复制 ✓" : "复制报告文本"}
           </button>
 
           <button
             onClick={async () => {
-              const text = reportText(report, data.session.mode);
+              const text = reportText(report, mode);
               if (navigator.share) {
                 try {
                   await navigator.share({ title: "Us 育儿复盘报告", text });
@@ -190,14 +203,14 @@ export default function FinalReportPage() {
                 });
               }
             }}
-            className="w-full rounded-xl bg-white border border-gray-300 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            className="clay-btn clay-btn-secondary w-full py-3 text-sm"
           >
             {shared ? "已分享 ✓" : "分享报告"}
           </button>
 
           <button
             onClick={() => {
-              const text = reportText(report, data.session.mode);
+              const text = reportText(report, mode);
               const blob = new Blob([text], { type: "text/plain" });
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
@@ -206,35 +219,36 @@ export default function FinalReportPage() {
               a.click();
               URL.revokeObjectURL(url);
             }}
-            className="w-full rounded-xl bg-white border border-gray-300 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            className="clay-btn clay-btn-secondary w-full py-3 text-sm"
           >
             下载报告文件
           </button>
 
+          {/* Reminder */}
           <div className="pt-2">
             {!reminderSet ? (
               <button
                 onClick={() => setShowReminder(!showReminder)}
-                className="w-full rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
+                className="clay-btn clay-btn-primary w-full py-3 text-sm"
               >
                 设定下一次复盘提醒
               </button>
             ) : (
-              <div className="rounded-xl bg-green-50 border border-green-200 p-4 text-center">
-                <p className="text-sm text-green-700 font-medium">提醒已设定 ✓</p>
-                <p className="text-xs text-green-600 mt-1">届时我们会提醒你们再次使用 Us 复盘</p>
+              <div className="clay-card p-4 text-center">
+                <p className="text-sm font-medium" style={{ color: "var(--c-success)" }}>提醒已设定 ✓</p>
+                <p className="text-xs mt-1" style={{ color: "var(--c-text-muted)" }}>届时我们会提醒你们再次使用 Us 复盘</p>
               </div>
             )}
 
             {showReminder && !reminderSet && (
-              <div className="mt-3 rounded-xl border border-gray-200 bg-white p-4">
-                <p className="text-sm text-gray-600 mb-3">选择提醒日期：</p>
+              <div className="clay-card mt-3 p-4">
+                <p className="text-sm mb-3" style={{ color: "var(--c-text-secondary)" }}>选择提醒日期：</p>
                 <div className="flex gap-2">
                   {[3, 7, 14, 30].map((days) => (
                     <button
                       key={days}
                       onClick={() => { setReminderSet(true); setShowReminder(false); }}
-                      className="flex-1 rounded-lg border border-gray-200 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:border-blue-300 transition"
+                      className="clay-btn clay-btn-secondary flex-1 py-2 text-sm"
                     >
                       {days}天后
                     </button>
@@ -245,11 +259,11 @@ export default function FinalReportPage() {
           </div>
         </div>
 
-        <div className="text-center">
-          <Link
-            to="/"
-            className="text-sm text-blue-600 hover:underline"
-          >
+        {/* Footer link */}
+        <div className="text-center pb-8">
+          <Link to="/"
+                className="text-sm font-medium transition"
+                style={{ color: "var(--c-primary)" }}>
             开始新的复盘 →
           </Link>
         </div>

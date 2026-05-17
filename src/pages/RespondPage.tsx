@@ -102,10 +102,12 @@ export default function RespondPage() {
     }
   };
 
+  /* ── Loading / joining states ── */
+
   if (!joined) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-500">正在加入…</p>
+        <p style={{ color: "var(--c-text-secondary)" }}>正在加入…</p>
       </div>
     );
   }
@@ -113,87 +115,103 @@ export default function RespondPage() {
   if (!data) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-500">加载中…</p>
+        <p style={{ color: "var(--c-text-secondary)" }}>加载中…</p>
       </div>
     );
   }
 
+  /* ── Processing state ── */
+
   if (data.session.phase === "processing") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-4">
-        <div className="animate-spin h-10 w-10 border-4 border-blue-200 border-t-blue-600 rounded-full mb-4" />
-        <h1 className="text-xl font-bold">帮帮团正在分析</h1>
-        <p className="mt-2 text-gray-500 text-center">
+        <div className="spinner mb-6" />
+        <h1 className="text-xl font-bold" style={{ color: "var(--c-text)" }}>帮帮团正在分析</h1>
+        <p className="mt-2 text-sm text-center" style={{ color: "var(--c-text-secondary)" }}>
           福尔摩斯和{data.session.mode === "parenting" ? "德雷克斯" : "罗杰斯"}正在阅读伴侣的陈述，请稍候…
         </p>
       </div>
     );
   }
 
+  /* ── Main respond view ── */
+
   const statement = data.session.initiatorStatement;
 
   return (
     <div className="flex min-h-screen flex-col px-4 py-8">
-      <div className="mx-auto w-full max-w-lg">
+      <div className="mx-auto w-full max-w-lg anim-fade-in">
+
+        {/* AI error banner */}
         {aiError && (
-          <div className="mb-4 rounded-xl bg-amber-50 border border-amber-200 p-3 text-sm text-amber-700">
+          <div className="mb-4 rounded-xl p-3 text-sm"
+               style={{ background: "var(--c-warning-light)", border: "1px solid rgba(232,201,138,0.3)", color: "#8A7240" }}>
             帮帮团分析暂时遇到问题，部分分析可能不完整。你可以继续流程。
           </div>
         )}
 
+        {/* Header */}
         <div className="mb-8">
-          <span className="text-sm font-medium text-blue-600">伴侣邀请你一起回顾</span>
-          <h1 className="mt-2 text-2xl font-bold">听听 Ta 的版本</h1>
+          <span className="badge-processing">伴侣邀请你一起回顾</span>
+          <h1 className="mt-3 text-2xl font-bold" style={{ color: "var(--c-text)" }}>听听 Ta 的版本</h1>
         </div>
 
+        {/* Initiator's original statement */}
         {statement && (
-          <div className="rounded-xl border border-gray-200 bg-white p-4 mb-6">
-            <p className="text-xs font-medium text-gray-400 mb-3">Ta 的原始陈述</p>
+          <div className="clay-card p-5 mb-6">
+            <p className="text-xs font-medium mb-4" style={{ color: "var(--c-text-muted)" }}>Ta 的原始陈述</p>
             <div className="space-y-3 text-sm">
               <div>
-                <span className="font-medium text-gray-600">事实：</span>
-                <span className="text-gray-700">{statement.fact}</span>
+                <span className="font-medium" style={{ color: "var(--c-text-secondary)" }}>事实：</span>
+                <span style={{ color: "var(--c-text)" }}>{statement.fact}</span>
               </div>
               <div>
-                <span className="font-medium text-gray-600">感受：</span>
-                <span className="text-gray-700">{statement.feeling}</span>
+                <span className="font-medium" style={{ color: "var(--c-text-secondary)" }}>感受：</span>
+                <span style={{ color: "var(--c-text)" }}>{statement.feeling}</span>
               </div>
             </div>
           </div>
         )}
 
+        {/* Judge cards (phase 1) */}
         {data.cards.length > 0 && (
           <div className="space-y-4 mb-6">
             {data.cards.map((card) => (
-              <div key={card.id} className="rounded-xl border border-gray-200 bg-white p-4">
-                <p className="text-xs font-medium text-gray-400 mb-2">{card.title}</p>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{card.content}</p>
+              <div key={card.id} className="clay-card p-5">
+                <p className="text-xs font-medium mb-3" style={{ color: "var(--c-text-muted)" }}>{card.title}</p>
+                <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--c-text-secondary)" }}>{card.content}</p>
               </div>
             ))}
           </div>
         )}
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">你的回应</label>
-          <p className="text-xs text-gray-400 mb-2">请针对以上内容，说出你的版本。你可以解释事实，也可以回应Ta的感受和观点。</p>
+        {/* Responder input */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--c-text)" }}>你的回应</label>
+          <p className="text-xs mb-2" style={{ color: "var(--c-text-muted)" }}>
+            请针对以上内容，说出你的版本。你可以解释事实，也可以回应Ta的感受和观点。
+          </p>
           <textarea
             value={response}
             onChange={(e) => setResponse(e.target.value)}
             placeholder="说出你的版本，聊聊你的感受…"
-            className="w-full rounded-xl border border-gray-300 p-4 text-sm min-h-[120px] resize-y"
+            className="clay-input min-h-[130px]"
           />
         </div>
 
+        {/* Error */}
         {error && (
-          <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700 mt-4">
+          <div className="rounded-xl p-3 text-sm mb-4 anim-fade-in"
+               style={{ background: "var(--c-danger-light)", border: "1px solid rgba(212,134,138,0.3)", color: "#8A5A5C" }}>
             {error}
           </div>
         )}
 
+        {/* Submit */}
         <button
           onClick={handleSubmit}
           disabled={submitting || !response.trim()}
-          className="mt-4 w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition"
+          className="clay-btn clay-btn-primary w-full py-4 text-lg"
         >
           {submitting ? "提交中…" : "提交回应"}
         </button>

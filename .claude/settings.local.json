@@ -18,7 +18,8 @@
       "Bash(node *)",
       "mcp__ide__getDiagnostics",
       "Bash(taskkill //f //im node.exe)",
-      "Bash(npm -v)"
+      "Bash(npm -v)",
+      "Bash(npx tsc *)"
     ]
   }
 }

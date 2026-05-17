@@ -1,1 +1,398 @@
 @import "tailwindcss";
+
+/* ═══════════════════════════════════════════
+   Us Design System — Warm Clay Soft UI
+   ═══════════════════════════════════════════ */
+
+:root {
+  /* ── Color Palette ── */
+  --c-bg:            #FAF7F2;
+  --c-bg-card:       #FFFBF7;
+  --c-bg-input:      #FFFBF7;
+  --c-bg-bubble-other: #F5F0E8;
+
+  --c-primary:       #7E9ED0;
+  --c-primary-hover: #8BAED8;
+  --c-primary-light: #F0F4FA;
+  --c-primary-border:#B8CDE8;
+
+  --c-accent:        #E8B4A2;
+  --c-accent-light:  #FDF6F3;
+  --c-accent-border: rgba(232, 180, 162, 0.3);
+
+  --c-success:       #7EC89A;
+  --c-success-light: #EDF7F1;
+  --c-warning:       #E8C98A;
+  --c-warning-light: #FDF9F0;
+  --c-danger:        #D4868A;
+  --c-danger-light:  #FDF4F4;
+
+  --c-text:          #3D3A38;
+  --c-text-secondary:#9E9A95;
+  --c-text-muted:    #C4B8A7;
+  --c-border:        #E8E3DE;
+  --c-border-light:  #F0ECE7;
+
+  /* ── Border Radius ── */
+  --r-sm:    8px;
+  --r-md:    12px;
+  --r-card:  20px;
+  --r-btn:   16px;
+  --r-input: 14px;
+  --r-bubble:18px;
+  --r-full:  9999px;
+
+  /* ── Shadows (clay / soft silicone feel) ── */
+  --shadow-card:
+    0 4px 20px rgba(61, 58, 56, 0.05),
+    0 1px 3px  rgba(61, 58, 56, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+  --shadow-card-elevated:
+    0 8px 32px rgba(61, 58, 56, 0.06),
+    0 2px 8px  rgba(61, 58, 56, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+  --shadow-btn:
+    0 4px 14px rgba(126, 158, 208, 0.3),
+    0 2px 4px  rgba(61, 58, 56, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+
+  --shadow-btn-hover:
+    0 6px 20px rgba(126, 158, 208, 0.35),
+    0 3px 6px  rgba(61, 58, 56, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+
+  --shadow-input:
+    0 2px 8px rgba(61, 58, 56, 0.04),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+
+  --shadow-bubble-mine:  0 2px 10px rgba(126, 158, 208, 0.2);
+  --shadow-bubble-other: 0 2px 8px  rgba(61, 58, 56, 0.04);
+  --shadow-bubble-judge: 0 2px 8px  rgba(232, 180, 162, 0.12);
+
+  /* ── Typography ── */
+  --font-sans: 'Inter', 'Noto Sans SC', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* ── Transitions ── */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ═══════════════════════════════════════════
+   Base
+   ═══════════════════════════════════════════ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(232, 180, 162, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(149, 181, 223, 0.06) 0%, transparent 70%),
+    var(--c-bg);
+  color: var(--c-text);
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════════
+   Clay Card
+   ═══════════════════════════════════════════ */
+
+.clay-card {
+  background: var(--c-bg-card);
+  border-radius: var(--r-card);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.3s ease;
+}
+
+/* ═══════════════════════════════════════════
+   Clay Buttons
+   ═══════════════════════════════════════════ */
+
+.clay-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: var(--r-btn);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-spring);
+  user-select: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.clay-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Primary */
+.clay-btn-primary {
+  background: linear-gradient(180deg, #95B5DF 0%, #7E9ED0 100%);
+  box-shadow: var(--shadow-btn);
+  color: white;
+}
+.clay-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #A3C0E5 0%, #8BAED8 100%);
+  box-shadow: var(--shadow-btn-hover);
+  transform: translateY(-1px);
+}
+.clay-btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(126, 158, 208, 0.25), inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Secondary */
+.clay-btn-secondary {
+  background: var(--c-bg-card);
+  box-shadow: 0 2px 8px rgba(61, 58, 56, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  color: var(--c-text-secondary);
+  border: 1px solid var(--c-border);
+}
+.clay-btn-secondary:hover:not(:disabled) {
+  background: var(--c-bg);
+  box-shadow: 0 4px 14px rgba(61, 58, 56, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  color: var(--c-text);
+}
+
+/* Ghost */
+.clay-btn-ghost {
+  background: transparent;
+  color: var(--c-text-secondary);
+}
+.clay-btn-ghost:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--c-text);
+}
+
+/* ═══════════════════════════════════════════
+   Clay Input / Textarea
+   ═══════════════════════════════════════════ */
+
+.clay-input {
+  display: block;
+  width: 100%;
+  background: var(--c-bg-input);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-input);
+  box-shadow: var(--shadow-input);
+  padding: 12px 16px;
+  color: var(--c-text);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  line-height: 1.6;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  resize: vertical;
+}
+
+.clay-input:focus {
+  outline: none;
+  border-color: var(--c-primary-border);
+  box-shadow: 0 0 0 3px rgba(184, 205, 232, 0.25), var(--shadow-input);
+}
+
+.clay-input::placeholder {
+  color: var(--c-text-muted);
+}
+
+/* ═══════════════════════════════════════════
+   Chat Bubbles
+   ═══════════════════════════════════════════ */
+
+.chat-bubble-mine {
+  background: linear-gradient(180deg, #95B5DF 0%, #7E9ED0 100%);
+  color: white;
+  border-radius: var(--r-bubble) var(--r-bubble) 4px var(--r-bubble);
+  box-shadow: var(--shadow-bubble-mine);
+  padding: 10px 16px;
+}
+
+.chat-bubble-other {
+  background: var(--c-bg-bubble-other);
+  color: var(--c-text);
+  border-radius: var(--r-bubble) var(--r-bubble) var(--r-bubble) 4px;
+  box-shadow: var(--shadow-bubble-other);
+  padding: 10px 16px;
+}
+
+.chat-bubble-judge {
+  background: var(--c-accent-light);
+  border: 1px solid var(--c-accent-border);
+  color: #6B5F52;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-bubble-judge);
+  padding: 10px 16px;
+}
+
+/* ═══════════════════════════════════════════
+   Mode Selector Card
+   ═══════════════════════════════════════════ */
+
+.mode-card {
+  background: var(--c-bg-card);
+  border: 2px solid var(--c-border-light);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  transition: all 0.25s var(--ease-spring);
+}
+
+.mode-card:hover {
+  border-color: var(--c-border);
+  box-shadow: var(--shadow-card-elevated);
+  transform: translateY(-2px);
+}
+
+.mode-card.selected {
+  border-color: var(--c-primary-border);
+  background: var(--c-primary-light);
+  box-shadow: 0 0 0 3px rgba(184, 205, 232, 0.2), var(--shadow-card);
+}
+
+/* ═══════════════════════════════════════════
+   Status Badges
+   ═══════════════════════════════════════════ */
+
+.badge-success {
+  background: var(--c-success-light);
+  color: #4A8A62;
+  border: 1px solid rgba(126, 200, 154, 0.3);
+  border-radius: var(--r-full);
+  padding: 4px 14px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.badge-warning {
+  background: var(--c-warning-light);
+  color: #8A7240;
+  border: 1px solid rgba(232, 201, 138, 0.3);
+  border-radius: var(--r-full);
+  padding: 4px 14px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.badge-processing {
+  background: var(--c-primary-light);
+  color: #5A7DB3;
+  border: 1px solid rgba(184, 205, 232, 0.3);
+  border-radius: var(--r-full);
+  padding: 4px 14px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════
+   Divider
+   ═══════════════════════════════════════════ */
+
+.clay-divider {
+  border: none;
+  height: 1px;
+  background: var(--c-border-light);
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════
+   Scrollbar
+   ═══════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #DDD4C5;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C4B8A7;
+}
+
+/* ═══════════════════════════════════════════
+   Selection
+   ═══════════════════════════════════════════ */
+
+::selection {
+  background: rgba(184, 205, 232, 0.35);
+}
+
+/* ═══════════════════════════════════════════
+   Animations
+   ═══════════════════════════════════════════ */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes softPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.anim-fade-in {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.anim-pulse-soft {
+  animation: softPulse 2s ease-in-out infinite;
+}
+
+.anim-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ═══════════════════════════════════════════
+   Spinner
+   ═══════════════════════════════════════════ */
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--c-primary-border);
+  border-top-color: var(--c-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ═══════════════════════════════════════════
+   Mobile: performance downgrade
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  :root {
+    --shadow-card: 0 2px 8px rgba(61, 58, 56, 0.04);
+    --shadow-btn:  0 2px 8px rgba(126, 158, 208, 0.25);
+    --r-card: 16px;
+    --r-btn:  14px;
+  }
+
+  body {
+    background: var(--c-bg); /* drop radial gradients for perf */
+  }
+}

@@ -27,54 +27,57 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
-      <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">Us</h1>
-      <p className="mt-3 text-lg text-gray-500">
-        不是"你vs我"，是"我们vs问题"
-      </p>
+      {/* Logo area */}
+      <div className="text-center anim-fade-in">
+        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight" style={{ color: "var(--c-text)" }}>
+          Us
+        </h1>
+        <p className="mt-3 text-lg" style={{ color: "var(--c-text-secondary)" }}>
+          不是"你vs我"，是"我们vs问题"
+        </p>
+      </div>
 
-      <div className="mt-12 w-full max-w-md">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      {/* Mode selector */}
+      <div className="mt-14 w-full max-w-md anim-fade-in" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
+        <label className="block text-sm font-medium mb-3" style={{ color: "var(--c-text-secondary)" }}>
           选择帮帮团模式
         </label>
+
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => setMode("parenting")}
-            className={`rounded-xl border-2 p-4 text-left transition ${
-              mode === "parenting"
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
-            }`}
+            className={`mode-card p-4 text-left ${mode === "parenting" ? "selected" : ""}`}
           >
-            <div className="font-semibold">育儿模式</div>
-            <div className="mt-1 text-sm text-gray-500">
+            <div className="font-semibold text-base" style={{ color: "var(--c-text)" }}>育儿模式</div>
+            <div className="mt-1.5 text-sm leading-relaxed" style={{ color: "var(--c-text-muted)" }}>
               福尔摩斯 + 德雷克斯 + 芒格
             </div>
           </button>
+
           <button
             onClick={() => setMode("emotion")}
-            className={`rounded-xl border-2 p-4 text-left transition ${
-              mode === "emotion"
-                ? "border-pink-500 bg-pink-50"
-                : "border-gray-200 hover:border-gray-300"
-            }`}
+            className={`mode-card p-4 text-left ${mode === "emotion" ? "selected" : ""}`}
           >
-            <div className="font-semibold">情感模式</div>
-            <div className="mt-1 text-sm text-gray-500">
+            <div className="font-semibold text-base" style={{ color: "var(--c-text)" }}>情感模式</div>
+            <div className="mt-1.5 text-sm leading-relaxed" style={{ color: "var(--c-text-muted)" }}>
               福尔摩斯 + 罗杰斯 + 芒格
             </div>
           </button>
         </div>
 
+        {/* Error */}
         {error && (
-          <div className="mt-4 rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+          <div className="mt-4 rounded-xl p-3 text-sm anim-fade-in"
+               style={{ background: "var(--c-danger-light)", border: "1px solid rgba(212,134,138,0.3)", color: "#8A5A5C" }}>
             {error}
           </div>
         )}
 
+        {/* CTA */}
         <button
           onClick={handleStart}
           disabled={loading}
-          className="mt-4 w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition"
+          className="clay-btn clay-btn-primary w-full mt-4 py-4 text-lg"
         >
           {loading ? "创建中…" : "开始新的复盘"}
         </button>

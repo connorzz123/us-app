@@ -9,7 +9,7 @@ import FinalReportPage from "./pages/FinalReportPage";
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/s/:sessionId" element={<RespondPage />} />
