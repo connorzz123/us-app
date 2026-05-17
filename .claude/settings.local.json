@@ -17,7 +17,8 @@
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('Phase:', d['session']['phase']\\); print\\('Cards:', len\\(d['cards']\\)\\)\")",
       "Bash(node *)",
       "mcp__ide__getDiagnostics",
-      "Bash(taskkill //f //im node.exe)"
+      "Bash(taskkill //f //im node.exe)",
+      "Bash(npm -v)"
     ]
   }
 }

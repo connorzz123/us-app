@@ -1,14 +1,11 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import VoiceInput from "../components/VoiceInput";
 
 export default function CreatePage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const [fact, setFact] = useState("");
   const [feeling, setFeeling] = useState("");
-  const [factVoice, setFactVoice] = useState(false);
-  const [feelingVoice, setFeelingVoice] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -23,7 +20,7 @@ export default function CreatePage() {
         body: JSON.stringify({
           fact: fact.trim(),
           feeling: feeling.trim(),
-          isVoiceTranscript: factVoice || feelingVoice,
+          isVoiceTranscript: false,
         }),
       });
       if (!res.ok) throw new Error("提交失败");
@@ -46,25 +43,27 @@ export default function CreatePage() {
         </div>
 
         <div className="space-y-6">
-          <VoiceInput
-            value={fact}
-            onChange={setFact}
-            label="事实描述"
-            hint="具体发生了什么？时间、关于孩子的什么事、双方做了什么"
-            placeholder="例如：今天晚饭时，孩子不肯吃青菜，我坚持让孩子至少尝一口，你直接把青菜拿走了…"
-            isVoice={factVoice}
-            onModeChange={setFactVoice}
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">事实描述</label>
+            <p className="text-xs text-gray-400 mb-2">具体发生了什么？时间、关于孩子的什么事、双方做了什么</p>
+            <textarea
+              value={fact}
+              onChange={(e) => setFact(e.target.value)}
+              placeholder="例如：今天晚饭时，孩子不肯吃青菜，我坚持让孩子至少尝一口，你直接把青菜拿走了…"
+              className="w-full rounded-xl border border-gray-300 p-4 text-sm min-h-[120px] resize-y"
+            />
+          </div>
 
-          <VoiceInput
-            value={feeling}
-            onChange={setFeeling}
-            label="感受表达"
-            hint="你的感受是什么？哪个点最让你难受？"
-            placeholder="例如：我觉得你总是在孩子面前否定我，让我感觉很孤立…"
-            isVoice={feelingVoice}
-            onModeChange={setFeelingVoice}
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">感受表达</label>
+            <p className="text-xs text-gray-400 mb-2">你的感受是什么？哪个点最让你难受？</p>
+            <textarea
+              value={feeling}
+              onChange={(e) => setFeeling(e.target.value)}
+              placeholder="例如：我觉得你总是在孩子面前否定我，让我感觉很孤立…"
+              className="w-full rounded-xl border border-gray-300 p-4 text-sm min-h-[120px] resize-y"
+            />
+          </div>
         </div>
 
         {error && (

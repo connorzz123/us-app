@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
-import VoiceInput from "../components/VoiceInput";
 
 interface JudgeCard {
   id: string;
@@ -26,7 +25,6 @@ export default function RespondPage() {
   const navigate = useNavigate();
   const [data, setData] = useState<SessionData | null>(null);
   const [response, setResponse] = useState("");
-  const [isVoice, setIsVoice] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [aiError, setAiError] = useState(false);
@@ -94,7 +92,7 @@ export default function RespondPage() {
       const res = await fetch(`/api/sessions/${sessionId}/responder`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ response: response.trim(), isVoiceTranscript: isVoice }),
+        body: JSON.stringify({ response: response.trim(), isVoiceTranscript: false }),
       });
       if (!res.ok) throw new Error("提交失败");
       navigate(`/s/${sessionId}/analysis?role=responder`);
@@ -175,15 +173,16 @@ export default function RespondPage() {
           </div>
         )}
 
-        <VoiceInput
-          value={response}
-          onChange={setResponse}
-          label="你的回应"
-          hint="请针对以上内容，说出你的版本。你可以解释事实，也可以回应Ta的感受和观点。"
-          placeholder="说出你的版本，聊聊你的感受…"
-          isVoice={isVoice}
-          onModeChange={setIsVoice}
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">你的回应</label>
+          <p className="text-xs text-gray-400 mb-2">请针对以上内容，说出你的版本。你可以解释事实，也可以回应Ta的感受和观点。</p>
+          <textarea
+            value={response}
+            onChange={(e) => setResponse(e.target.value)}
+            placeholder="说出你的版本，聊聊你的感受…"
+            className="w-full rounded-xl border border-gray-300 p-4 text-sm min-h-[120px] resize-y"
+          />
+        </div>
 
         {error && (
           <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700 mt-4">
