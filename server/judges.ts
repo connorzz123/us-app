@@ -336,7 +336,7 @@ export async function generateIntervention(
   mode: Mode
 ): Promise<string> {
   const conflictRole = mode === "parenting" ? "德雷克斯" : "罗杰斯";
-  const prompt = `作为判官团队（福尔摩斯、${conflictRole}、芒格），请阅读以下伴侣对话。如果对话陷入僵局、偏离主题、或出现攻击性言语，请给出温和的引导。如果对话进展顺利，只需说"继续"。
+  const prompt = `作为帮帮团（福尔摩斯、${conflictRole}、芒格），请阅读以下伴侣对话。如果对话陷入僵局、偏离主题、或出现攻击性言语，请给出温和的引导。如果对话进展顺利，只需说"继续"。
 
 对话历史：
 ${chatContext}

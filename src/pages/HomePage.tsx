@@ -34,7 +34,7 @@ export default function HomePage() {
 
       <div className="mt-12 w-full max-w-md">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          选择判官模式
+          选择帮帮团模式
         </label>
         <div className="grid grid-cols-2 gap-3">
           <button

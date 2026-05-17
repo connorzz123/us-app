@@ -94,7 +94,7 @@ export default function FinalReportPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-4">
         <div className="animate-spin h-10 w-10 border-4 border-blue-200 border-t-blue-600 rounded-full mb-4" />
-        <h1 className="text-xl font-bold">判官正在生成结语</h1>
+        <h1 className="text-xl font-bold">帮帮团正在生成结语</h1>
         <p className="mt-2 text-gray-500 text-center">请稍候片刻…</p>
       </div>
     );
@@ -111,8 +111,8 @@ export default function FinalReportPage() {
             </svg>
           </div>
           <span className="text-sm font-medium text-green-600">最终结语</span>
-          <h1 className="mt-2 text-2xl font-bold">判官团队的综合意见</h1>
-          <p className="mt-1 text-gray-500">这是三位判官给你们的最终建议</p>
+          <h1 className="mt-2 text-2xl font-bold">帮帮团的综合意见</h1>
+          <p className="mt-1 text-gray-500">这是帮帮团给你们的最终建议</p>
         </div>
 
         <div className="space-y-4 mb-8">

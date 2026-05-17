@@ -151,7 +151,7 @@ export default function ChatPage() {
         <div className="mx-auto max-w-lg space-y-3">
           {messages.length === 0 && (
             <p className="text-center text-sm text-gray-400 py-12">
-              判官已经完成了分析。现在请坦诚地交谈吧。
+              帮帮团已经完成了分析。现在请坦诚地交谈吧。
             </p>
           )}
           {messages.map((msg) => {
@@ -220,7 +220,7 @@ export default function ChatPage() {
                   : "text-gray-400 hover:text-gray-600"
               }`}
             >
-              {myWantEnd ? "已请求结束（点击取消）" : "我们都讲完了，请判官生成结语"}
+              {myWantEnd ? "已请求结束（点击取消）" : "我们都讲完了，请帮帮团生成结语"}
             </button>
             {myWantEnd && (
               <span className="ml-2 text-xs text-gray-400">

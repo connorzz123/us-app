@@ -118,7 +118,7 @@ export default function AnalysisPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-4">
         <div className="animate-spin h-10 w-10 border-4 border-blue-200 border-t-blue-600 rounded-full mb-4" />
-        <h1 className="text-xl font-bold">判官正在分析</h1>
+        <h1 className="text-xl font-bold">帮帮团正在分析</h1>
         <p className="mt-2 text-gray-500 text-center">
           福尔摩斯、{data.session.mode === "parenting" ? "德雷克斯" : "罗杰斯"}和芒格正在综合双方陈述，生成分歧分析报告…
         </p>
@@ -139,7 +139,7 @@ export default function AnalysisPage() {
       <div className="mx-auto w-full max-w-lg">
         {aiError && (
           <div className="mb-4 rounded-xl bg-amber-50 border border-amber-200 p-3 text-sm text-amber-700">
-            判官分析暂时遇到问题，部分分析可能不完整。你可以继续流程。
+            帮帮团分析暂时遇到问题，部分分析可能不完整。你可以继续流程。
           </div>
         )}
 
@@ -147,7 +147,7 @@ export default function AnalysisPage() {
           <span className="text-sm font-medium text-blue-600">第三阶段</span>
           <h1 className="mt-2 text-2xl font-bold">分歧分析报告</h1>
           <p className="mt-1 text-gray-500">
-            判官团队基于双方的陈述，给出了以下分析。请认真阅读。
+            帮帮团基于双方的陈述，给出了以下分析。请认真阅读。
           </p>
         </div>
 

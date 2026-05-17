@@ -103,7 +103,7 @@ export default function WaitingPage() {
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center">
               <div className="animate-spin h-10 w-10 border-4 border-blue-200 border-t-blue-600 rounded-full" />
             </div>
-            <h1 className="text-2xl font-bold">判官正在分析</h1>
+            <h1 className="text-2xl font-bold">帮帮团正在分析</h1>
             <p className="mt-2 text-gray-500">
               福尔摩斯和{getConflictResolverName(sessionData?.session.mode || "parenting")}正在阅读你的陈述，请稍候…
             </p>
@@ -119,12 +119,12 @@ export default function WaitingPage() {
 
             <h1 className="text-2xl font-bold">陈述已提交</h1>
             <p className="mt-2 text-gray-500">
-              判官已完成分析。现在邀请你的伴侣加入吧。
+              帮帮团已完成分析。现在邀请你的伴侣加入吧。
             </p>
 
             {aiError && (
               <div className="mt-4 rounded-xl bg-amber-50 border border-amber-200 p-3 text-sm text-amber-700">
-                判官分析暂时遇到问题，部分分析可能不完整。你可以继续流程，不影响使用。
+                帮帮团分析暂时遇到问题，部分分析可能不完整。你可以继续流程，不影响使用。
               </div>
             )}
 
@@ -179,7 +179,7 @@ export default function WaitingPage() {
 
             {sessionData?.cards && sessionData.cards.length > 0 && (
               <div className="mt-8 space-y-4 text-left">
-                <p className="text-sm font-medium text-gray-400">判官分析</p>
+                <p className="text-sm font-medium text-gray-400">帮帮团分析</p>
                 {sessionData.cards.map((card) => (
                   <div key={card.id} className="rounded-xl border border-gray-200 bg-white p-4">
                     <p className="text-xs font-medium text-gray-400 mb-2">{card.title}</p>
