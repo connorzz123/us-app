@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
 import { createServer } from "http";
@@ -6,6 +9,10 @@ import { v4 as uuid } from "uuid";
 import { createSessionRouter } from "./routes/sessions";
 import * as storage from "./storage";
 import { generateIntervention, generateFinalReport } from "./judges";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const httpServer = createServer(app);
@@ -16,6 +23,13 @@ const io = new Server(httpServer, {
 app.use(cors());
 app.use(express.json());
 app.use("/api/sessions", createSessionRouter(io));
+
+// Serve static frontend files in production
+const distPath = join(__dirname, "..", "dist");
+app.use(express.static(distPath));
+app.get("/{*path}", (_req, res) => {
+  res.sendFile(join(distPath, "index.html"));
+});
 
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });

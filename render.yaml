@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: us-app
+    runtime: node
+    plan: free
+    buildCommand: npx vite build
+    startCommand: npx tsx server/index.ts
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ANTHROPIC_BASE_URL
+        sync: false
+      - key: ANTHROPIC_AUTH_TOKEN
+        sync: false
+      - key: ANTHROPIC_MODEL
+        sync: false

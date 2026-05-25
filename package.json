@@ -6,11 +6,13 @@
   "scripts": {
     "dev": "concurrently \"tsx watch --env-file=.env server/index.ts\" \"vite\"",
     "build": "vite build",
-    "start": "node --env-file=.env server/index.js"
+    "start": "node --env-file=.env server/index.js",
+    "build:full": "vite build && tsx server/index.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
     "express": "^5.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
