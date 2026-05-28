@@ -3,7 +3,7 @@ services:
     name: us-app
     runtime: node
     plan: free
-    buildCommand: npx vite build
+    buildCommand: npm install && npx vite build
     startCommand: npx tsx server/index.ts
     envVars:
       - key: NODE_ENV
