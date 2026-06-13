@@ -67,7 +67,7 @@ export async function generatePhase1Cards(
 【事实】${fact}
 【感受】${feeling}
 
-请输出一段简洁的中文分析（150-200字）。语气温和而专业，像一位理解家长困境的朋友。突出核心结论，避免重复。`;`;
+请输出一段简洁的中文分析（150-200字）。语气温和而专业，像一位理解家长困境的朋友。突出核心结论，避免重复。`;
 
     const dreikursContent = await ask(dreikursPrompt);
     cards.push({
@@ -91,7 +91,7 @@ export async function generatePhase1Cards(
 【事实】${fact}
 【感受】${feeling}
 
-请输出一段简洁的中文分析（150-200字）。语气温和、充满共情，像一位真正理解Ta的人。突出核心感受，避免重复。`;`;
+请输出一段简洁的中文分析（150-200字）。语气温和、充满共情，像一位真正理解Ta的人。突出核心感受，避免重复。`;
 
     const rogersContent = await ask(rogersPrompt);
     cards.push({
@@ -131,7 +131,7 @@ export async function generatePhase2Cards(
 回应者陈述：
 ${responderText}
 
-请输出简洁的事实对比（不超过5条要点），用一句话总结双方在事实认知上的差异。总字数控制在150字以内。`;`;
+请输出简洁的事实对比（不超过5条要点），用一句话总结双方在事实认知上的差异。总字数控制在150字以内。`;
 
   const holmesContent = await ask(holmesPrompt);
   cards.push({
@@ -159,7 +159,7 @@ ${responderText}
 回应者陈述：
 ${responderText}
 
-请输出一段简洁的中文分析（150-200字）。温和专业，突出核心发现，不对任何一方贴标签。`;`;
+请输出一段简洁的中文分析（150-200字）。温和专业，突出核心发现，不对任何一方贴标签。`;
 
     const dreikursContent = await ask(dreikursPrompt);
     cards.push({
@@ -186,7 +186,7 @@ ${responderText}
 回应者陈述：
 ${responderText}
 
-请输出一段简洁的中文分析（150-200字）。突出核心情感洞察，充满共情和温暖。`;`;
+请输出一段简洁的中文分析（150-200字）。突出核心情感洞察，充满共情和温暖。`;
 
     const rogersContent = await ask(rogersPrompt);
     cards.push({
@@ -228,7 +228,7 @@ export async function generatePhase3Cards(
 回应者陈述：
 ${responderText}
 
-请输出简洁的事实分歧报告（不超过5条要点），用一句"你们卡在了XXX"作为结尾。总字数控制在150字以内。`;`;
+请输出简洁的事实分歧报告（不超过5条要点），用一句"你们卡在了XXX"作为结尾。总字数控制在150字以内。`;
 
   const holmesContent = await ask(holmesPrompt);
   cards.push({
@@ -257,7 +257,7 @@ ${responderText}
 回应者陈述：
 ${responderText}
 
-请输出一段简洁的中文分析（150-200字）。突出核心差异和洞察，像在帮助朋友理解自己。`;`;
+请输出一段简洁的中文分析（150-200字）。突出核心差异和洞察，像在帮助朋友理解自己。`;
 
     const dreikursContent = await ask(dreikursPrompt);
     cards.push({
@@ -284,7 +284,7 @@ ${responderText}
 回应者陈述：
 ${responderText}
 
-请输出一段简洁的中文分析（150-200字）。突出核心情感洞察，帮助双方看见自己。`;`;
+请输出一段简洁的中文分析（150-200字）。突出核心情感洞察，帮助双方看见自己。`;
 
     const rogersContent = await ask(rogersPrompt);
     cards.push({
@@ -313,7 +313,7 @@ ${responderText}
 回应者陈述：
 ${responderText}
 
-请输出一段简洁的中文分析（150-200字）。给出1-2个具体建议，务实、简洁、不绕弯子。`;`;
+请输出一段简洁的中文分析（150-200字）。给出1-2个具体建议，务实、简洁、不绕弯子。`;
 
   const mungerContent = await ask(mungerPrompt);
   cards.push({
