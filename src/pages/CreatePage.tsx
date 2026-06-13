@@ -53,12 +53,12 @@ export default function CreatePage() {
               事实描述
             </label>
             <p className="text-xs mb-2" style={{ color: "var(--c-text-muted)" }}>
-              具体发生了什么？时间、关于孩子的什么事、双方做了什么
+              具体发生了什么？时间、事件经过、双方做了什么
             </p>
             <textarea
               value={fact}
               onChange={(e) => setFact(e.target.value)}
-              placeholder="例如：今天晚饭时，孩子不肯吃青菜，我坚持让孩子至少尝一口，你直接把青菜拿走了…"
+              placeholder="例如：今天晚饭时，因为一件家务的分工问题，我坚持按原计划执行，你直接拒绝配合…"
               className="clay-input min-h-[130px]"
             />
           </div>
