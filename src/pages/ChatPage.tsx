@@ -211,16 +211,19 @@ export default function ChatPage() {
           </div>
 
           {/* End conversation */}
-          <div className="mt-2 text-center">
+          <div className="mt-3 text-center">
             <button
               onClick={requestEnd}
-              className="text-xs font-medium transition"
-              style={{ color: myWantEnd ? "var(--c-warning)" : "var(--c-text-muted)" }}
+              className="text-sm font-semibold transition px-4 py-1.5 rounded-lg"
+              style={{
+                color: myWantEnd ? "var(--c-warning)" : "var(--c-text-secondary)",
+                background: myWantEnd ? "var(--c-warning-light)" : "transparent",
+              }}
             >
               {myWantEnd ? "已请求结束（点击取消）" : "我们都讲完了，请帮帮团生成结语"}
             </button>
             {myWantEnd && (
-              <span className="ml-2 text-xs" style={{ color: "var(--c-text-muted)" }}>
+              <span className="ml-2 text-sm" style={{ color: "var(--c-text-muted)" }}>
                 {otherWantEnd ? "" : "（1/2）"}
               </span>
             )}
