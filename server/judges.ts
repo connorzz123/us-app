@@ -30,7 +30,7 @@ export async function generatePhase1Cards(
   const cards: Card[] = [];
 
   // Holmes - Fact skeleton
-  const holmesPrompt = `你是一位名叫"夏洛克·福尔摩斯"的事实解析师。你的任务是：
+  const holmesPrompt = `你是一位名叫"夏洛克·福尔摩斯"的事实解析师。
 
 请阅读发起人的陈述，提炼出**事实骨架**：
 - 剔除"你总是""你从来不""每次都是"等模糊、绝对化的表达
@@ -41,7 +41,7 @@ export async function generatePhase1Cards(
 【事实】${fact}
 【感受】${feeling}
 
-请输出一段连贯的中文分析（200-400字），格式：先列出客观时间线，然后指出核心分歧点（如果有的话）。用"我们"而非"你"来指代双方，保持中立、温和的语气。`;
+请输出简洁的事实清单（不超过5条，每条一句话），最后用一句话总结核心分歧点。用"我们"而非"你"来指代双方，保持中立、温和的语气。总字数控制在150字以内。`;
 
   const holmesContent = await ask(holmesPrompt);
   cards.push({
@@ -67,7 +67,7 @@ export async function generatePhase1Cards(
 【事实】${fact}
 【感受】${feeling}
 
-请输出一段连贯的中文分析（200-400字）。语气温和而专业，像一位理解家长困境的朋友。指出问题但不评判人格。`;
+请输出一段简洁的中文分析（150-200字）。语气温和而专业，像一位理解家长困境的朋友。突出核心结论，避免重复。`;`;
 
     const dreikursContent = await ask(dreikursPrompt);
     cards.push({
@@ -91,7 +91,7 @@ export async function generatePhase1Cards(
 【事实】${fact}
 【感受】${feeling}
 
-请输出一段连贯的中文分析（200-400字）。语气温和、充满共情，像一位真正理解Ta的人。避免评价或建议，专注于理解和翻译情绪。`;
+请输出一段简洁的中文分析（150-200字）。语气温和、充满共情，像一位真正理解Ta的人。突出核心感受，避免重复。`;`;
 
     const rogersContent = await ask(rogersPrompt);
     cards.push({
@@ -131,7 +131,7 @@ export async function generatePhase2Cards(
 回应者陈述：
 ${responderText}
 
-请输出一段连贯的中文分析（200-400字）。客观、中立，只聚焦事实层面。`;
+请输出简洁的事实对比（不超过5条要点），用一句话总结双方在事实认知上的差异。总字数控制在150字以内。`;`;
 
   const holmesContent = await ask(holmesPrompt);
   cards.push({
@@ -159,7 +159,7 @@ ${responderText}
 回应者陈述：
 ${responderText}
 
-请输出一段连贯的中文分析（200-400字）。温和专业，不对任何一方贴标签。`;
+请输出一段简洁的中文分析（150-200字）。温和专业，突出核心发现，不对任何一方贴标签。`;`;
 
     const dreikursContent = await ask(dreikursPrompt);
     cards.push({
@@ -186,7 +186,7 @@ ${responderText}
 回应者陈述：
 ${responderText}
 
-请输出一段连贯的中文分析（200-400字）。充满共情和温暖。`;
+请输出一段简洁的中文分析（150-200字）。突出核心情感洞察，充满共情和温暖。`;`;
 
     const rogersContent = await ask(rogersPrompt);
     cards.push({
@@ -228,7 +228,7 @@ export async function generatePhase3Cards(
 回应者陈述：
 ${responderText}
 
-请输出一段连贯的中文分析（200-400字）。用一句"你们卡在了XXX这个具体问题上"作为结尾。`;
+请输出简洁的事实分歧报告（不超过5条要点），用一句"你们卡在了XXX"作为结尾。总字数控制在150字以内。`;`;
 
   const holmesContent = await ask(holmesPrompt);
   cards.push({
@@ -257,7 +257,7 @@ ${responderText}
 回应者陈述：
 ${responderText}
 
-请输出一段连贯的中文分析（250-400字）。指出差异但不评判优劣，像在帮助朋友理解自己。`;
+请输出一段简洁的中文分析（150-200字）。突出核心差异和洞察，像在帮助朋友理解自己。`;`;
 
     const dreikursContent = await ask(dreikursPrompt);
     cards.push({
@@ -284,7 +284,7 @@ ${responderText}
 回应者陈述：
 ${responderText}
 
-请输出一段连贯的中文分析（250-400字）。用温暖而深邃的洞察力，帮助双方看见自己。`;
+请输出一段简洁的中文分析（150-200字）。突出核心情感洞察，帮助双方看见自己。`;`;
 
     const rogersContent = await ask(rogersPrompt);
     cards.push({
@@ -313,7 +313,7 @@ ${responderText}
 回应者陈述：
 ${responderText}
 
-请输出一段连贯的中文分析（200-300字）。务实、简洁、不绕弯子。`;
+请输出一段简洁的中文分析（150-200字）。给出1-2个具体建议，务实、简洁、不绕弯子。`;`;
 
   const mungerContent = await ask(mungerPrompt);
   cards.push({
@@ -367,7 +367,7 @@ export async function generateFinalReport(
 回应者陈述：${responderText}
 对话记录：${chatMessages}
 
-请输出一段话（100-200字），明确点出分歧的核心是什么，不使用"你vs我"的说法，用"我们面临着…"的表达。`),
+请输出一段话（80-150字），明确点出分歧的核心是什么，不使用"你vs我"的说法，用"我们面临着…"的表达。`),
 
     ask(`你是一位名叫"查理·芒格"的思维专家。
 
@@ -377,7 +377,7 @@ export async function generateFinalReport(
 回应者陈述：${responderText}
 对话记录：${chatMessages}
 
-请输出一段话（150-250字）。`),
+请输出一段话（100-180字）。`),
 
     ask(`你是一位名叫"${conflictName}"的${mode === "parenting" ? "育儿" : "心理"}专家。
 
@@ -387,7 +387,7 @@ export async function generateFinalReport(
 回应者陈述：${responderText}
 对话记录：${chatMessages}
 
-请输出一段话（150-250字），温和而坚定地指出双方共同的出发点。`),
+请输出一段话（100-180字），温和而坚定地指出双方共同的出发点。`),
 
     ask(`你是一位名叫"查理·芒格"的思维专家。
 
@@ -399,7 +399,7 @@ export async function generateFinalReport(
 回应者陈述：${responderText}
 对话记录：${chatMessages}
 
-请输出（200-400字）。具体、可操作，避免空洞的"多沟通"之类的话。`),
+请输出（150-250字）。具体、可操作，避免空洞的"多沟通"之类的话。`),
   ]);
 
   return {
