@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
-  const [mode, setMode] = useState<"parenting" | "emotion">("parenting");
+  const [mode, setMode] = useState<"parenting" | "emotion">("emotion");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -45,22 +45,22 @@ export default function HomePage() {
 
         <div className="grid grid-cols-2 gap-3">
           <button
-            onClick={() => setMode("parenting")}
-            className={`mode-card p-4 text-left ${mode === "parenting" ? "selected" : ""}`}
-          >
-            <div className="font-semibold text-base" style={{ color: "var(--c-text)" }}>育儿模式</div>
-            <div className="mt-1.5 text-sm leading-relaxed" style={{ color: "var(--c-text-muted)" }}>
-              福尔摩斯 + 德雷克斯 + 芒格
-            </div>
-          </button>
-
-          <button
             onClick={() => setMode("emotion")}
             className={`mode-card p-4 text-left ${mode === "emotion" ? "selected" : ""}`}
           >
             <div className="font-semibold text-base" style={{ color: "var(--c-text)" }}>情感模式</div>
             <div className="mt-1.5 text-sm leading-relaxed" style={{ color: "var(--c-text-muted)" }}>
               福尔摩斯 + 罗杰斯 + 芒格
+            </div>
+          </button>
+
+          <button
+            onClick={() => setMode("parenting")}
+            className={`mode-card p-4 text-left ${mode === "parenting" ? "selected" : ""}`}
+          >
+            <div className="font-semibold text-base" style={{ color: "var(--c-text)" }}>育儿模式</div>
+            <div className="mt-1.5 text-sm leading-relaxed" style={{ color: "var(--c-text-muted)" }}>
+              福尔摩斯 + 德雷克斯 + 芒格
             </div>
           </button>
         </div>
