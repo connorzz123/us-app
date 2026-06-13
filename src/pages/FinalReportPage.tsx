@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { io } from "socket.io-client";
+import Markdown from "react-markdown";
 
 interface FinalReport {
   holmes: string;
@@ -135,7 +136,7 @@ export default function FinalReportPage() {
               <h2 className="font-semibold text-base" style={{ color: "var(--c-text)" }}>事实分歧确认</h2>
               <span className="text-xs" style={{ color: "var(--c-text-muted)" }}>夏洛克·福尔摩斯</span>
             </div>
-            <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--c-text-secondary)" }}>{report.holmes}</p>
+            <Markdown className="text-sm leading-relaxed prose-content">{report.holmes}</Markdown>
           </div>
 
           {/* Munger: Responsibility */}
@@ -145,7 +146,7 @@ export default function FinalReportPage() {
               <h2 className="font-semibold text-base" style={{ color: "var(--c-text)" }}>责任裁定</h2>
               <span className="text-xs" style={{ color: "var(--c-text-muted)" }}>查理·芒格</span>
             </div>
-            <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--c-text-secondary)" }}>{report.mungerResponsibility}</p>
+            <Markdown className="text-sm leading-relaxed prose-content">{report.mungerResponsibility}</Markdown>
           </div>
 
           {/* Conflict resolver: Common Ground */}
@@ -155,7 +156,7 @@ export default function FinalReportPage() {
               <h2 className="font-semibold text-base" style={{ color: "var(--c-text)" }}>共同出发点</h2>
               <span className="text-xs" style={{ color: "var(--c-text-muted)" }}>{mode === "parenting" ? "鲁道夫·德雷克斯" : "卡尔·罗杰斯"}</span>
             </div>
-            <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--c-text-secondary)" }}>{report.conflictCommon}</p>
+            <Markdown className="text-sm leading-relaxed prose-content">{report.conflictCommon}</Markdown>
           </div>
 
           {/* Munger: Action Suggestions */}
@@ -166,7 +167,7 @@ export default function FinalReportPage() {
               <h2 className="font-semibold text-base" style={{ color: "#5A7DB3" }}>双向行动建议</h2>
               <span className="text-xs" style={{ color: "var(--c-primary)" }}>查理·芒格</span>
             </div>
-            <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "#5A7DB3" }}>{report.mungerActions}</p>
+            <Markdown className="text-sm leading-relaxed prose-content" style={{ color: "#5A7DB3" }}>{report.mungerActions}</Markdown>
           </div>
         </div>
 

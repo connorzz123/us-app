@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
+import Markdown from "react-markdown";
 
 interface JudgeCard {
   id: string;
@@ -179,7 +180,7 @@ export default function RespondPage() {
             {data.cards.map((card) => (
               <div key={card.id} className="clay-card p-5">
                 <p className="text-xs font-medium mb-3" style={{ color: "var(--c-text-muted)" }}>{card.title}</p>
-                <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--c-text-secondary)" }}>{card.content}</p>
+                <Markdown className="text-sm leading-relaxed prose-content">{card.content}</Markdown>
               </div>
             ))}
           </div>

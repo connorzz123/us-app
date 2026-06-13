@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
+import Markdown from "react-markdown";
 
 interface JudgeCard {
   id: string;
@@ -182,7 +183,7 @@ export default function AnalysisPage() {
             <div key={card.id} className="clay-card p-5"
                  style={{ background: "var(--c-primary-light)", borderColor: "var(--c-primary-border)" }}>
               <p className="text-sm font-semibold mb-3" style={{ color: "#5A7DB3" }}>{card.title}</p>
-              <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--c-text-secondary)" }}>{card.content}</p>
+              <Markdown className="text-sm leading-relaxed prose-content">{card.content}</Markdown>
             </div>
           ))}
         </div>
@@ -194,7 +195,7 @@ export default function AnalysisPage() {
             {phase2Cards.map((card) => (
               <div key={card.id} className="clay-card p-5">
                 <p className="text-xs font-medium mb-3" style={{ color: "var(--c-text-muted)" }}>{card.title}</p>
-                <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--c-text-secondary)" }}>{card.content}</p>
+                <Markdown className="text-sm leading-relaxed prose-content">{card.content}</Markdown>
               </div>
             ))}
           </div>
@@ -207,7 +208,7 @@ export default function AnalysisPage() {
             {phase1Cards.map((card) => (
               <div key={card.id} className="clay-card p-5">
                 <p className="text-xs font-medium mb-3" style={{ color: "var(--c-text-muted)" }}>{card.title}</p>
-                <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--c-text-secondary)" }}>{card.content}</p>
+                <Markdown className="text-sm leading-relaxed prose-content">{card.content}</Markdown>
               </div>
             ))}
           </div>

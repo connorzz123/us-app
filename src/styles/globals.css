@@ -338,6 +338,65 @@ body {
 }
 
 /* ═══════════════════════════════════════════
+   Markdown Prose Content (Judge Cards)
+   ═══════════════════════════════════════════ */
+
+.prose-content {
+  color: var(--c-text-secondary);
+}
+
+.prose-content p {
+  margin: 0.5em 0;
+}
+
+.prose-content p:first-child {
+  margin-top: 0;
+}
+
+.prose-content p:last-child {
+  margin-bottom: 0;
+}
+
+.prose-content strong {
+  color: var(--c-text);
+  font-weight: 600;
+}
+
+.prose-content em {
+  font-style: italic;
+  color: var(--c-text-secondary);
+}
+
+.prose-content ul,
+.prose-content ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.prose-content li {
+  margin: 0.25em 0;
+}
+
+.prose-content h1,
+.prose-content h2,
+.prose-content h3 {
+  color: var(--c-text);
+  font-weight: 600;
+  margin: 0.75em 0 0.25em;
+}
+
+.prose-content h1 { font-size: 1.1em; }
+.prose-content h2 { font-size: 1em; }
+.prose-content h3 { font-size: 0.95em; }
+
+.prose-content blockquote {
+  border-left: 3px solid var(--c-primary-border);
+  margin: 0.5em 0;
+  padding: 0.25em 0.75em;
+  color: var(--c-text-muted);
+}
+
+/* ═══════════════════════════════════════════
    Animations
    ═══════════════════════════════════════════ */
 
