@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Card, FinalReport } from "./storage";
+import { assertBudgetAvailable, recordUsage } from "./budget";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_AUTH_TOKEN || process.env.ANTHROPIC_API_KEY,
@@ -9,6 +10,9 @@ const client = new Anthropic({
 type Mode = "parenting" | "emotion";
 
 async function ask(prompt: string): Promise<string> {
+  // 预算熔断：额度不足就不发请求，直接失败
+  assertBudgetAvailable();
+
   const msg = await client.messages.create({
     model: process.env.ANTHROPIC_MODEL || "deepseek-v4-pro",
     max_tokens: 1024,
@@ -16,6 +20,13 @@ async function ask(prompt: string): Promise<string> {
     system: "你是一位专业的家庭关系、育儿和冲突解决专家。请用中文回复，语气温和而专业，像一位智慧的朋友。回答要具体、可操作，避免空洞的安慰。",
     messages: [{ role: "user", content: prompt }],
   });
+
+  // 记录真实 token 消耗（兼容层字段可能缺失，故做可选处理）
+  const usage = (msg as { usage?: { input_tokens?: number; output_tokens?: number } }).usage;
+  if (usage) {
+    recordUsage(usage.input_tokens ?? 0, usage.output_tokens ?? 0);
+  }
+
   const block = msg.content.find((b) => b.type === "text");
   return block?.text ?? "";
 }

@@ -5,3 +5,9 @@ data/
 
 .vercel
 .env*
+
+# 本地工作文件（不进入公开仓库）
+.workbuddy/
+.claude/settings.local.json
+SECURITY-PLAN.md
+*.docx

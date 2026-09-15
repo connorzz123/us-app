@@ -8,9 +8,21 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      # ── AI 调用 ──
       - key: ANTHROPIC_BASE_URL
         sync: false
       - key: ANTHROPIC_AUTH_TOKEN
         sync: false
       - key: ANTHROPIC_MODEL
+        sync: false
+      # ── 安全防护（在 Render 控制台配置，不进代码仓库）──
+      - key: MASTER_CODE      # 岩哥自己的主访问码，永不过期
+        sync: false
+      - key: ADMIN_KEY        # /admin 管理后台密钥
+        sync: false
+      - key: DAILY_TOKEN_BUDGET   # 每日 AI token 预算熔断线
+        sync: false
+      - key: DAILY_SESSION_LIMIT  # 每日新建复盘数上限
+        sync: false
+      - key: RATE_LIMIT_PER_IP    # 单 IP 每小时可创建复盘数
         sync: false

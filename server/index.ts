@@ -7,8 +7,10 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { v4 as uuid } from "uuid";
 import { createSessionRouter } from "./routes/sessions";
+import { createAdminRouter } from "./routes/admin";
 import * as storage from "./storage";
 import { generateIntervention, generateFinalReport } from "./judges";
+import { verifyCode, reasonText } from "./access";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
@@ -22,17 +24,118 @@ const io = new Server(httpServer, {
 
 app.use(cors());
 app.use(express.json());
+
+const COOKIE_NAME = "us_code";
+const COOKIE_MAX_AGE = 7 * 24 * 3600; // 7 天
+
+function parseCookies(header?: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!header) return out;
+  for (const part of header.split(";")) {
+    const idx = part.indexOf("=");
+    if (idx < 1) continue;
+    const k = part.slice(0, idx).trim();
+    const v = part.slice(idx + 1).trim();
+    if (k) out[k] = decodeURIComponent(v);
+  }
+  return out;
+}
+
+/** 优先读请求头（方便脚本/调试），其次读 cookie（浏览器自动带） */
+function readAccessCode(req: express.Request): string {
+  const fromHeader = req.header("X-Access-Code");
+  if (fromHeader) return fromHeader;
+  return parseCookies(req.header("cookie"))[COOKIE_NAME] || "";
+}
+
+// ── 探活：必须放在 SPA fallback 之前，否则会被 index.html 吃掉 ──
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
+
+// ── 访问码验证 ──
+app.post("/api/auth/verify", (req, res) => {
+  const code = (req.body?.code as string) || "";
+  // 耗尽的码也允许登录（可继续进行中的会话、查看历史），只提示额度状态
+  const result = verifyCode(code);
+  if (!result.ok) {
+    res.status(401).json({ ok: false, message: reasonText(result.reason) });
+    return;
+  }
+  const createCheck = verifyCode(code, { forCreate: true });
+  res.setHeader(
+    "Set-Cookie",
+    `${COOKIE_NAME}=${encodeURIComponent(result.code)}; HttpOnly; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=Lax`
+  );
+  res.json({
+    ok: true,
+    code: result.code,
+    note: createCheck.ok ? result.note : `${result.note}（新增复盘额度已用完，仍可继续/查看）`,
+    isMaster: result.isMaster,
+    canCreate: createCheck.ok,
+  });
+});
+
+// ── 当前登录状态（前端用它判断要不要弹输入框）──
+app.get("/api/auth/status", (req, res) => {
+  const result = verifyCode(readAccessCode(req));
+  res.json({
+    ok: result.ok,
+    note: result.ok ? result.note : null,
+    isMaster: result.ok ? result.isMaster : false,
+  });
+});
+
+// ── Admin 后台：ADMIN_KEY 保护 ──
+const ADMIN_KEY = process.env.ADMIN_KEY || "";
+app.use("/api/admin", (req, res, next) => {
+  if (!ADMIN_KEY) {
+    res.status(503).json({ error: "admin_not_configured" });
+    return;
+  }
+  if (req.header("X-Admin-Key") !== ADMIN_KEY) {
+    res.status(403).json({ error: "forbidden" });
+    return;
+  }
+  next();
+});
+app.use("/api/admin", createAdminRouter());
+
+// ── 业务接口：访问码保护 ──
+app.use("/api/sessions", (req, res, next) => {
+  const code = readAccessCode(req);
+  // 只有“创建新复盘”（POST /api/sessions）才检查次数是否耗尽，
+  // 进行中的会话和历史查看不因次数用完被中断
+  const forCreate = req.method === "POST" && req.path === "/";
+  const result = verifyCode(code, { forCreate });
+  if (!result.ok) {
+    res.status(401).json({ error: "unauthorized", message: reasonText(result.reason) });
+    return;
+  }
+  (req as unknown as { accessCode: string }).accessCode = result.code;
+  next();
+});
 app.use("/api/sessions", createSessionRouter(io));
 
-// Serve static frontend files in production
+// ── 静态前端 ──
 const distPath = join(__dirname, "..", "dist");
 app.use(express.static(distPath));
 app.get("/{*path}", (_req, res) => {
   res.sendFile(join(distPath, "index.html"));
 });
 
-app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok" });
+// ── Socket.IO 连接鉴权 ──
+io.use((socket, next) => {
+  const authCode = (socket.handshake.auth?.code as string) || "";
+  const cookieCode = parseCookies(socket.handshake.headers?.cookie)[COOKIE_NAME] || "";
+  const code = authCode || cookieCode;
+  const result = verifyCode(code);
+  if (!result.ok) {
+    next(new Error("unauthorized"));
+    return;
+  }
+  (socket as unknown as { accessCode: string }).accessCode = result.code;
+  next();
 });
 
 // ── Socket.IO: Phase 4 chat ──

@@ -16,11 +16,15 @@ export default function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mode }),
       });
-      if (!res.ok) throw new Error("创建失败");
+      if (!res.ok) {
+        // 把服务端的具体原因（访问码无效/额度用完/今日上限等）透出来
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.message || "创建失败");
+      }
       const session = await res.json();
       navigate(`/s/${session.id}/create`);
-    } catch {
-      setError("创建会话失败，请检查网络后重试");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "创建会话失败，请检查网络后重试");
       setLoading(false);
     }
   };
