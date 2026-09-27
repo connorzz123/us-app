@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import CreatePage from "./pages/CreatePage";
 import WaitingPage from "./pages/WaitingPage";
@@ -28,6 +28,9 @@ function installAuthExpiredInterceptor(onExpired: () => void) {
 
 export default function App() {
   const [auth, setAuth] = useState<AuthState>("checking");
+  // 只持邀请凭证的人：记住凭证绑定的那一份复盘，只放行它的页面
+  const [inviteSessionId, setInviteSessionId] = useState<string | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
     installAuthExpiredInterceptor(() => setAuth("locked"));
@@ -35,28 +38,44 @@ export default function App() {
     // 回应者拿到的邀请链接形如 /s/<id>?k=<邀请凭证>。
     // 用凭证换一次进入权限即可，不必再让回应者输一遍访问码。
     async function boot() {
+      type Status = { ok?: boolean; inviteSessionId?: string | null };
+      let status: Status = {};
       try {
-        const status = await fetch("/api/auth/status").then((r) => r.json());
-        if (status.ok) {
-          setAuth("ok");
-          return;
-        }
+        status = await fetch("/api/auth/status").then((r) => r.json());
       } catch { /* 继续尝试邀请凭证 */ }
 
-      const k = new URLSearchParams(window.location.search).get("k");
-      const matched = window.location.pathname.match(/^\/s\/([^/]+)\/?$/);
-      if (k && matched) {
-        try {
-          const res = await fetch(`/api/sessions/${matched[1]}/join`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ k }),
-          });
-          if (res.ok) {
-            setAuth("ok");
-            return;
-          }
-        } catch { /* 落到访问码门 */ }
+      // 带 ?k= 的邀请链接：先换票（服务端会下发 HttpOnly 邀请 cookie）
+      if (!status.ok) {
+        const k = new URLSearchParams(window.location.search).get("k");
+        const matched = window.location.pathname.match(/^\/s\/([^/]+)\/?$/);
+        if (k && matched) {
+          try {
+            const res = await fetch(`/api/sessions/${matched[1]}/join`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ k }),
+            });
+            if (res.ok) {
+              status = await fetch("/api/auth/status")
+                .then((r) => r.json())
+                .catch(() => ({}));
+            }
+          } catch { /* 落到访问码门 */ }
+        }
+      }
+
+      if (status.ok) {
+        setAuth("ok");
+        return;
+      }
+
+      // 只有邀请凭证：仅放行它绑定的那一份复盘，
+      // 首页等其它页面照旧回访问码门——邀请链接不等于"成了会员"
+      const inviteId = status.inviteSessionId ?? null;
+      if (inviteId && window.location.pathname.startsWith(`/s/${inviteId}`)) {
+        setInviteSessionId(inviteId);
+        setAuth("ok");
+        return;
       }
 
       setAuth("locked");
@@ -64,6 +83,12 @@ export default function App() {
 
     boot();
   }, []);
+
+  // 邀请用户一旦离开自己那一份复盘（比如点"开始新的复盘"回首页），退回访问码门
+  useEffect(() => {
+    if (!inviteSessionId) return;
+    if (!location.pathname.startsWith(`/s/${inviteSessionId}`)) setAuth("locked");
+  }, [location.pathname, inviteSessionId]);
 
   if (auth === "checking") {
     return (

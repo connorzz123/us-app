@@ -98,18 +98,28 @@ app.post("/api/auth/verify", (req, res) => {
 app.get("/api/auth/status", (req, res) => {
   const result = verifyCode(readAccessCode(req));
   if (result.ok) {
-    res.json({ ok: true, note: result.note, isMaster: result.isMaster, invite: false });
+    res.json({
+      ok: true,
+      note: result.note,
+      isMaster: result.isMaster,
+      invite: false,
+      inviteSessionId: null,
+    });
     return;
   }
-  // 回应者凭邀请 cookie 也能进入，但只对那一份复盘有效（不能创建新复盘）
+  // 只持邀请凭证的人**不算"已登录"**：邀请凭证只对那一份复盘有效，
+  // 首页等其它页面仍应回到访问码门。这里把绑定的会话 id 交给前端，
+  // 由前端只放行 /s/<该会话>... 的页面。
   const inviteSessionId = verifyInviteCookie(
     parseCookies(req.header("cookie"))[INVITE_COOKIE]
   );
-  if (inviteSessionId) {
-    res.json({ ok: true, note: "邀请链接", isMaster: false, invite: true, sessionId: inviteSessionId });
-    return;
-  }
-  res.json({ ok: false, note: null, isMaster: false, invite: false });
+  res.json({
+    ok: false,
+    note: null,
+    isMaster: false,
+    invite: Boolean(inviteSessionId),
+    inviteSessionId: inviteSessionId ?? null,
+  });
 });
 
 // ── Admin 后台：ADMIN_KEY 保护 ──
