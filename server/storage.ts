@@ -1,6 +1,7 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import { existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { loadJson, saveJson } from "./jsonstore";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "..", "data");
@@ -10,6 +11,8 @@ export interface Session {
   id: string;
   mode: "parenting" | "emotion";
   phase: "phase1" | "phase2" | "phase3" | "phase4" | "final" | "processing" | "generating";
+  /** 邀请凭证：回应者凭它直接进入，无需再输访问码（见 server/invite.ts） */
+  inviteKey?: string;
   initiatorStatement: { fact: string; feeling: string; isVoiceTranscript: boolean } | null;
   responderStatement: { response: string; isVoiceTranscript: boolean } | null;
   responderJoined: boolean;
@@ -57,17 +60,18 @@ interface DB {
 }
 
 function loadDB(): DB {
-  if (!existsSync(DB_PATH)) return { sessions: [], cards: [], messages: [] };
-  try {
-    return JSON.parse(readFileSync(DB_PATH, "utf-8"));
-  } catch {
-    return { sessions: [], cards: [], messages: [] };
+  const fallback = (): DB => ({ sessions: [], cards: [], messages: [] });
+  const db = loadJson<DB>(DB_PATH, fallback);
+  // 形状不对时不要拿去写，否则会把正常数据覆盖掉
+  if (!db || !Array.isArray(db.sessions) || !Array.isArray(db.cards) || !Array.isArray(db.messages)) {
+    console.error("[storage] 数据文件结构异常，本次按空库处理（不会写回）");
+    return fallback();
   }
+  return db;
 }
 
 function saveDB(db: DB): void {
-  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
-  writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+  saveJson(DB_PATH, db);
 }
 
 export function createSession(session: Session): void {

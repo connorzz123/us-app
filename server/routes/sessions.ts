@@ -4,6 +4,7 @@ import type { Server } from "socket.io";
 import * as storage from "../storage";
 import { consumeCode, withinRateLimit } from "../access";
 import { canCreateSession, recordSession } from "../budget";
+import { newInviteKey, getInviteKey, inviteCookieHeader } from "../invite";
 import {
   generatePhase1Cards,
   generatePhase2Cards,
@@ -38,6 +39,7 @@ export function createSessionRouter(io: Server) {
       id: uuid(),
       mode,
       phase: "phase1",
+      inviteKey: newInviteKey(),
       initiatorStatement: null,
       responderStatement: null,
       responderJoined: false,
@@ -113,15 +115,25 @@ export function createSessionRouter(io: Server) {
   });
 
   // Mark responder as joined
+  // 若带邀请凭证 k（来自邀请链接），同时下发邀请 cookie：
+  // 回应者此后无需再输访问码，但该 cookie 只对本会话有效
   router.post("/:id/join", (req: Request, res: Response) => {
     const session = storage.getSession(String(req.params.id));
     if (!session) {
       res.status(404).json({ error: "session not found" });
       return;
     }
+
+    const k = typeof req.body?.k === "string" ? req.body.k.trim() : "";
+    const expected = getInviteKey(session.id);
+    const inviteAccepted = Boolean(k && expected && k === expected);
+    if (inviteAccepted && expected) {
+      res.setHeader("Set-Cookie", inviteCookieHeader(session.id, expected));
+    }
+
     storage.updateSession(String(req.params.id), { responderJoined: true });
     io.to(session.id).emit("responder-joined", {});
-    res.json({ joined: true });
+    res.json({ joined: true, inviteAccepted });
   });
 
   // Update responder statement (Phase 2)

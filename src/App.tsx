@@ -31,10 +31,38 @@ export default function App() {
 
   useEffect(() => {
     installAuthExpiredInterceptor(() => setAuth("locked"));
-    fetch("/api/auth/status")
-      .then((r) => r.json())
-      .then((data) => setAuth(data.ok ? "ok" : "locked"))
-      .catch(() => setAuth("locked"));
+
+    // 回应者拿到的邀请链接形如 /s/<id>?k=<邀请凭证>。
+    // 用凭证换一次进入权限即可，不必再让回应者输一遍访问码。
+    async function boot() {
+      try {
+        const status = await fetch("/api/auth/status").then((r) => r.json());
+        if (status.ok) {
+          setAuth("ok");
+          return;
+        }
+      } catch { /* 继续尝试邀请凭证 */ }
+
+      const k = new URLSearchParams(window.location.search).get("k");
+      const matched = window.location.pathname.match(/^\/s\/([^/]+)\/?$/);
+      if (k && matched) {
+        try {
+          const res = await fetch(`/api/sessions/${matched[1]}/join`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ k }),
+          });
+          if (res.ok) {
+            setAuth("ok");
+            return;
+          }
+        } catch { /* 落到访问码门 */ }
+      }
+
+      setAuth("locked");
+    }
+
+    boot();
   }, []);
 
   if (auth === "checking") {

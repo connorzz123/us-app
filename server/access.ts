@@ -1,7 +1,7 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { randomBytes } from "crypto";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { loadJson, saveJson } from "./jsonstore";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "..", "data");
@@ -24,18 +24,12 @@ interface CodeDB {
 }
 
 function load(): CodeDB {
-  if (!existsSync(CODES_PATH)) return { codes: [] };
-  try {
-    const db = JSON.parse(readFileSync(CODES_PATH, "utf-8")) as CodeDB;
-    return db && Array.isArray(db.codes) ? db : { codes: [] };
-  } catch {
-    return { codes: [] };
-  }
+  const db = loadJson<CodeDB>(CODES_PATH, () => ({ codes: [] }));
+  return db && Array.isArray(db.codes) ? db : { codes: [] };
 }
 
 function save(db: CodeDB): void {
-  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
-  writeFileSync(CODES_PATH, JSON.stringify(db, null, 2));
+  saveJson(CODES_PATH, db);
 }
 
 // 去掉了 I/O/0/1 等易混淆字符

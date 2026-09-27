@@ -11,6 +11,7 @@ import { createAdminRouter } from "./routes/admin";
 import * as storage from "./storage";
 import { generateIntervention, generateFinalReport } from "./judges";
 import { verifyCode, reasonText } from "./access";
+import { INVITE_COOKIE, verifyInviteCookie, getInviteKey } from "./invite";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import os from "os";
@@ -96,11 +97,19 @@ app.post("/api/auth/verify", (req, res) => {
 // ── 当前登录状态（前端用它判断要不要弹输入框）──
 app.get("/api/auth/status", (req, res) => {
   const result = verifyCode(readAccessCode(req));
-  res.json({
-    ok: result.ok,
-    note: result.ok ? result.note : null,
-    isMaster: result.ok ? result.isMaster : false,
-  });
+  if (result.ok) {
+    res.json({ ok: true, note: result.note, isMaster: result.isMaster, invite: false });
+    return;
+  }
+  // 回应者凭邀请 cookie 也能进入，但只对那一份复盘有效（不能创建新复盘）
+  const inviteSessionId = verifyInviteCookie(
+    parseCookies(req.header("cookie"))[INVITE_COOKIE]
+  );
+  if (inviteSessionId) {
+    res.json({ ok: true, note: "邀请链接", isMaster: false, invite: true, sessionId: inviteSessionId });
+    return;
+  }
+  res.json({ ok: false, note: null, isMaster: false, invite: false });
 });
 
 // ── Admin 后台：ADMIN_KEY 保护 ──
@@ -124,13 +133,44 @@ app.use("/api/sessions", (req, res, next) => {
   // 只有“创建新复盘”（POST /api/sessions）才检查次数是否耗尽，
   // 进行中的会话和历史查看不因次数用完被中断
   const forCreate = req.method === "POST" && req.path === "/";
+
+  // 邀请链接的入口：回应者带 k 调 /join，用它换取邀请 cookie。
+  // 这一步必须放行——否则回应者连"证明自己收到链接"的机会都没有。
+  // 只有 k 与目标会话的邀请凭证完全一致才放行，之后由 join 路由下发 cookie。
+  const joinMatch = req.method === "POST" ? /^\/([^/]+)\/join$/.exec(req.path) : null;
+  if (joinMatch) {
+    const k = typeof req.body?.k === "string" ? req.body.k.trim() : "";
+    const expected = getInviteKey(joinMatch[1]);
+    if (k && expected && k === expected) {
+      next();
+      return;
+    }
+  }
+
   const result = verifyCode(code, { forCreate });
-  if (!result.ok) {
-    res.status(401).json({ error: "unauthorized", message: reasonText(result.reason) });
+  if (result.ok) {
+    (req as unknown as { accessCode: string }).accessCode = result.code;
+    next();
     return;
   }
-  (req as unknown as { accessCode: string }).accessCode = result.code;
-  next();
+
+  // 已持有邀请 cookie 的回应者：不必再输访问码。
+  // 但只放行「它自己那一份复盘」的读写，且永远不能创建新复盘——
+  // 这样即使链接被转发，也不会消耗码的额度或被人拿去白用产品。
+  const inviteSessionId = verifyInviteCookie(
+    parseCookies(req.header("cookie"))[INVITE_COOKIE]
+  );
+  if (inviteSessionId && !forCreate) {
+    const target = req.path.split("/")[1] ?? "";
+    if (target && target === inviteSessionId) {
+      (req as unknown as { accessCode: string }).accessCode = "";
+      (req as unknown as { inviteSessionId: string }).inviteSessionId = inviteSessionId;
+      next();
+      return;
+    }
+  }
+
+  res.status(401).json({ error: "unauthorized", message: reasonText(result.reason) });
 });
 app.use("/api/sessions", createSessionRouter(io));
 
@@ -144,15 +184,22 @@ app.get("/{*path}", (_req, res) => {
 // ── Socket.IO 连接鉴权 ──
 io.use((socket, next) => {
   const authCode = (socket.handshake.auth?.code as string) || "";
-  const cookieCode = parseCookies(socket.handshake.headers?.cookie)[COOKIE_NAME] || "";
-  const code = authCode || cookieCode;
+  const cookies = parseCookies(socket.handshake.headers?.cookie);
+  const code = authCode || cookies[COOKIE_NAME] || "";
   const result = verifyCode(code);
-  if (!result.ok) {
-    next(new Error("unauthorized"));
+  if (result.ok) {
+    (socket as unknown as { accessCode: string }).accessCode = result.code;
+    next();
     return;
   }
-  (socket as unknown as { accessCode: string }).accessCode = result.code;
-  next();
+  // 回应者走邀请 cookie：只允许在它自己那一份复盘里收发
+  const inviteSessionId = verifyInviteCookie(cookies[INVITE_COOKIE]);
+  if (inviteSessionId) {
+    (socket as unknown as { inviteSessionId: string }).inviteSessionId = inviteSessionId;
+    next();
+    return;
+  }
+  next(new Error("unauthorized"));
 });
 
 // ── Socket.IO: Phase 4 chat ──
@@ -160,12 +207,17 @@ io.use((socket, next) => {
 const interventionCounts = new Map<string, number>();
 
 io.on("connection", (socket) => {
+  const inviteOnly = (socket as unknown as { inviteSessionId?: string }).inviteSessionId;
+
   socket.on("join-room", (sessionId: string) => {
+    // 邀请用户只能进自己那一间（别人的复盘读不到）
+    if (inviteOnly && sessionId !== inviteOnly) return;
     socket.join(sessionId);
   });
 
   socket.on("chat-message", (data: { sessionId: string; sender: "initiator" | "responder"; content: string }) => {
     const { sessionId, sender, content } = data;
+    if (inviteOnly && sessionId !== inviteOnly) return;
     const session = storage.getSession(sessionId);
     if (!session || session.phase !== "phase4") return;
 

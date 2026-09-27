@@ -15,6 +15,7 @@ interface SessionData {
     id: string;
     mode: string;
     phase: string;
+    inviteKey?: string;
     initiatorStatement: { fact: string; feeling: string; isVoiceTranscript: boolean } | null;
     responderJoined: boolean;
   };
@@ -41,10 +42,14 @@ export default function WaitingPage() {
 
   const isLocalhost =
     window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-  const inviteLink =
+  const base =
     isLocalhost && lanIp
-      ? `${window.location.protocol}//${lanIp}:${window.location.port}/s/${sessionId}`
-      : `${window.location.origin}/s/${sessionId}`;
+      ? `${window.location.protocol}//${lanIp}:${window.location.port}`
+      : window.location.origin;
+  // 邀请链接带上邀请凭证：对方点开即可直接进入，不需要再输一次访问码。
+  // 该凭证只能访问这一份复盘，不能创建新复盘（见 server/invite.ts）。
+  const inviteKey = sessionData?.session.inviteKey;
+  const inviteLink = `${base}/s/${sessionId}${inviteKey ? `?k=${inviteKey}` : ""}`;
 
   useEffect(() => {
     const socket = io();

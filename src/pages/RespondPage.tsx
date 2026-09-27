@@ -34,7 +34,14 @@ export default function RespondPage() {
 
   const join = useCallback(async () => {
     try {
-      await fetch(`/api/sessions/${sessionId}/join`, { method: "POST" });
+      // 邀请链接带的 k 交给服务端换成邀请 cookie，
+      // 这样回应者后续刷新/进聊天页都不会再被要求输访问码
+      const k = new URLSearchParams(window.location.search).get("k");
+      await fetch(`/api/sessions/${sessionId}/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(k ? { k } : {}),
+      });
     } catch { /* retry */ }
     setJoined(true);
   }, [sessionId]);

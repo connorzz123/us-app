@@ -1,6 +1,6 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { loadJson, saveJson } from "./jsonstore";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "..", "data");
@@ -30,20 +30,14 @@ function emptyState(): BudgetState {
 }
 
 function load(): BudgetState {
-  if (!existsSync(BUDGET_PATH)) return emptyState();
-  try {
-    const s = JSON.parse(readFileSync(BUDGET_PATH, "utf-8")) as BudgetState;
-    // 跨天自动重置
-    if (!s || s.date !== todayKey()) return emptyState();
-    return s;
-  } catch {
-    return emptyState();
-  }
+  const s = loadJson<BudgetState>(BUDGET_PATH, emptyState);
+  // 跨天自动重置
+  if (!s || s.date !== todayKey()) return emptyState();
+  return s;
 }
 
 function save(s: BudgetState): void {
-  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
-  writeFileSync(BUDGET_PATH, JSON.stringify(s, null, 2));
+  saveJson(BUDGET_PATH, s);
 }
 
 export function dailyTokenBudget(): number {
