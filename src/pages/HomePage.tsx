@@ -36,10 +36,7 @@ export default function HomePage() {
         <h1 className="text-5xl sm:text-6xl font-bold tracking-tight" style={{ color: "var(--c-text)" }}>
           Us
         </h1>
-        <p className="mt-3 text-lg font-medium" style={{ color: "var(--c-text-secondary)" }}>
-          不和稀泥的吵架判官
-        </p>
-        <p className="mt-1.5 text-sm" style={{ color: "var(--c-text-muted)" }}>
+        <p className="mt-3 text-lg" style={{ color: "var(--c-text-secondary)" }}>
           不是"你vs我"，是"我们vs问题"
         </p>
       </div>
