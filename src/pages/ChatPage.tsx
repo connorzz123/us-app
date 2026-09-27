@@ -26,6 +26,7 @@ export default function ChatPage() {
   const [endStatus, setEndStatus] = useState<EndStatus>({ initiatorWantEnd: false, responderWantEnd: false });
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [reportProgress, setReportProgress] = useState<{ done: number; total: number } | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -64,6 +65,10 @@ export default function ChatPage() {
 
     socket.on("end-status", (status: EndStatus) => {
       setEndStatus(status);
+    });
+
+    socket.on("report-progress", (d: { done: number; total: number }) => {
+      setReportProgress(d);
     });
 
     socket.on("phase-change", (data: { phase: string }) => {
@@ -128,6 +133,48 @@ export default function ChatPage() {
         >
           重试
         </button>
+      </div>
+    );
+  }
+
+  /* ── 双方都请求结束后：生成结语期间的等待界面 ── */
+
+  if (endStatus.initiatorWantEnd && endStatus.responderWantEnd) {
+    const pct =
+      reportProgress && reportProgress.total > 0
+        ? Math.round((reportProgress.done / reportProgress.total) * 100)
+        : 8;
+
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center px-4">
+        <div className="spinner mb-6" />
+        <h1 className="text-xl font-bold" style={{ color: "var(--c-text)" }}>
+          帮帮团正在生成结语
+        </h1>
+        <p className="mt-2 max-w-xs text-center text-sm" style={{ color: "var(--c-text-secondary)" }}>
+          正在综合双方陈述和你们的对话，出具最终裁定…
+        </p>
+
+        <div className="mt-6 w-full max-w-xs">
+          <div
+            className="h-1.5 w-full overflow-hidden rounded-full"
+            style={{ background: "var(--c-primary-light)" }}
+          >
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${pct}%`, background: "var(--c-primary)" }}
+            />
+          </div>
+          {reportProgress && (
+            <p className="mt-2 text-center text-xs" style={{ color: "var(--c-text-muted)" }}>
+              正在生成第 {Math.min(reportProgress.done + 1, reportProgress.total)}/{reportProgress.total} 项
+            </p>
+          )}
+        </div>
+
+        <p className="mt-8 text-xs" style={{ color: "var(--c-text-muted)" }}>
+          通常需要 20~40 秒，请不要关闭页面
+        </p>
       </div>
     );
   }
@@ -211,22 +258,27 @@ export default function ChatPage() {
           </div>
 
           {/* End conversation */}
-          <div className="mt-3 text-center">
+          <div className="mt-3">
             <button
               onClick={requestEnd}
-              className="text-sm font-semibold transition px-4 py-1.5 rounded-lg"
-              style={{
-                color: myWantEnd ? "var(--c-warning)" : "var(--c-text-secondary)",
-                background: myWantEnd ? "var(--c-warning-light)" : "transparent",
-              }}
+              className={
+                myWantEnd
+                  ? "w-full rounded-xl py-3 text-sm font-semibold transition"
+                  : "clay-btn clay-btn-primary w-full py-3.5 text-base"
+              }
+              style={
+                myWantEnd
+                  ? { color: "var(--c-warning)", background: "var(--c-warning-light)" }
+                  : undefined
+              }
             >
-              {myWantEnd ? "已请求结束（点击取消）" : "我们都讲完了，请帮帮团生成结语"}
+              {myWantEnd
+                ? `已请求结束（点击取消）${otherWantEnd ? "" : " · 等待对方确认"}`
+                : "我们都讲完了，请帮帮团生成结语"}
             </button>
-            {myWantEnd && (
-              <span className="ml-2 text-sm" style={{ color: "var(--c-text-muted)" }}>
-                {otherWantEnd ? "" : "（1/2）"}
-              </span>
-            )}
+            <p className="mt-2 text-center text-xs" style={{ color: "var(--c-text-muted)" }}>
+              双方都点击后，帮帮团会综合你们的对话出具最终裁定
+            </p>
           </div>
         </div>
       </div>

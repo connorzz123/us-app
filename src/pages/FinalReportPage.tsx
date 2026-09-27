@@ -136,7 +136,9 @@ export default function FinalReportPage() {
               <h2 className="font-semibold text-base" style={{ color: "var(--c-text)" }}>事实分歧确认</h2>
               <span className="text-xs" style={{ color: "var(--c-text-muted)" }}>夏洛克·福尔摩斯</span>
             </div>
-            <Markdown className="text-sm leading-relaxed prose-content">{report.holmes}</Markdown>
+            <div className="text-sm leading-relaxed prose-content">
+              <Markdown>{report.holmes}</Markdown>
+            </div>
           </div>
 
           {/* Munger: Responsibility */}
@@ -146,7 +148,9 @@ export default function FinalReportPage() {
               <h2 className="font-semibold text-base" style={{ color: "var(--c-text)" }}>责任裁定</h2>
               <span className="text-xs" style={{ color: "var(--c-text-muted)" }}>查理·芒格</span>
             </div>
-            <Markdown className="text-sm leading-relaxed prose-content">{report.mungerResponsibility}</Markdown>
+            <div className="text-sm leading-relaxed prose-content">
+              <Markdown>{report.mungerResponsibility}</Markdown>
+            </div>
           </div>
 
           {/* Conflict resolver: Common Ground */}
@@ -156,7 +160,9 @@ export default function FinalReportPage() {
               <h2 className="font-semibold text-base" style={{ color: "var(--c-text)" }}>共同出发点</h2>
               <span className="text-xs" style={{ color: "var(--c-text-muted)" }}>{mode === "parenting" ? "鲁道夫·德雷克斯" : "卡尔·罗杰斯"}</span>
             </div>
-            <Markdown className="text-sm leading-relaxed prose-content">{report.conflictCommon}</Markdown>
+            <div className="text-sm leading-relaxed prose-content">
+              <Markdown>{report.conflictCommon}</Markdown>
+            </div>
           </div>
 
           {/* Munger: Action Suggestions */}
@@ -167,7 +173,9 @@ export default function FinalReportPage() {
               <h2 className="font-semibold text-base" style={{ color: "#5A7DB3" }}>双向行动建议</h2>
               <span className="text-xs" style={{ color: "var(--c-primary)" }}>查理·芒格</span>
             </div>
-            <Markdown className="text-sm leading-relaxed prose-content" style={{ color: "#5A7DB3" }}>{report.mungerActions}</Markdown>
+            <div className="text-sm leading-relaxed prose-content" style={{ color: "#5A7DB3" }}>
+              <Markdown>{report.mungerActions}</Markdown>
+            </div>
           </div>
         </div>
 
@@ -193,7 +201,7 @@ export default function FinalReportPage() {
               const text = reportText(report, mode);
               if (navigator.share) {
                 try {
-                  await navigator.share({ title: "Us 育儿复盘报告", text });
+                  await navigator.share({ title: `Us ${mode === "parenting" ? "育儿" : "情感"}复盘报告`, text });
                   setShared(true);
                   setTimeout(() => setShared(false), 2000);
                 } catch { /* user cancelled */ }
@@ -276,7 +284,7 @@ export default function FinalReportPage() {
 function reportText(report: FinalReport, mode: string) {
   const conflictName = mode === "parenting" ? "德雷克斯" : "罗杰斯";
   return [
-    "Us 育儿复盘报告",
+    `Us ${mode === "parenting" ? "育儿" : "情感"}复盘报告`,
     "",
     "事实分歧确认（夏洛克·福尔摩斯）",
     report.holmes,

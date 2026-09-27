@@ -13,6 +13,7 @@ import { generateIntervention, generateFinalReport } from "./judges";
 import { verifyCode, reasonText } from "./access";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import os from "os";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -51,6 +52,22 @@ function readAccessCode(req: express.Request): string {
 // ── 探活：必须放在 SPA fallback 之前，否则会被 index.html 吃掉 ──
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
+});
+
+// ── 局域网地址：手机上打开 localhost 是访问手机自己，邀请链接必须换成局域网 IP ──
+app.get("/api/network-info", (_req, res) => {
+  const nets = os.networkInterfaces();
+  let lanIp: string | null = null;
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name] ?? []) {
+      if (net.family === "IPv4" && !net.internal) {
+        lanIp = net.address;
+        break;
+      }
+    }
+    if (lanIp) break;
+  }
+  res.json({ lanIp, port: 3001 });
 });
 
 // ── 访问码验证 ──
@@ -225,7 +242,12 @@ io.on("connection", (socket) => {
         .join("\n");
 
       if (init && resp) {
-        generateFinalReport(init.fact, init.feeling, resp.response, chatText, session.mode)
+        // 生成期间无反馈会让用户以为卡死，先推一次进度让等待界面立刻亮起来
+        io.to(sessionId).emit("report-progress", { done: 0, total: 4 });
+
+        generateFinalReport(init.fact, init.feeling, resp.response, chatText, session.mode, (done, total) => {
+          io.to(sessionId).emit("report-progress", { done, total });
+        })
           .then((report) => {
             storage.updateSession(sessionId, { finalReport: report, phase: "final" });
             io.to(sessionId).emit("phase-change", { phase: "final" });
@@ -261,7 +283,9 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = 3001;
+// Render 等平台会动态分配端口并通过 PORT 环境变量下发，
+// 写死端口会导致平台找不到服务（表现为返回 Not Found）。
+const PORT = Number(process.env.PORT) || 3001;
 httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`Us server running on http://localhost:${PORT}`);
 });

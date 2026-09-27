@@ -1,7 +1,37 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
-import Markdown from "react-markdown";
+import BulletContent from "../components/BulletContent";
+
+/** 可折叠区块标题 */
+function SectionToggle({
+  label,
+  count,
+  open,
+  onToggle,
+}: {
+  label: string;
+  count: number;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      onClick={onToggle}
+      className="clay-btn w-full flex items-center justify-between px-4 py-2.5 text-sm"
+    >
+      <span style={{ color: "var(--c-text)" }}>
+        {label}
+        <span className="ml-2 text-xs" style={{ color: "var(--c-text-muted)" }}>
+          {count} 项
+        </span>
+      </span>
+      <span className="text-xs" style={{ color: "var(--c-text-secondary)" }}>
+        {open ? "收起 ▲" : "展开 ▼"}
+      </span>
+    </button>
+  );
+}
 
 interface JudgeCard {
   id: string;
@@ -33,12 +63,19 @@ export default function AnalysisPage() {
   const [confirming, setConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState("");
   const [aiError, setAiError] = useState(false);
+  const [showPhase2, setShowPhase2] = useState(false);
+  const [showPhase1, setShowPhase1] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     const socket = io();
     socketRef.current = socket;
     socket.emit("join-room", sessionId);
+
+    socket.on("analysis-progress", (d: { done: number; total: number }) => {
+      setProgress(d);
+    });
 
     socket.on("phase-change", (data: { phase: string; error?: string }) => {
       if (data.error === "ai_failed") {
@@ -125,8 +162,24 @@ export default function AnalysisPage() {
         <div className="spinner mb-6" />
         <h1 className="text-xl font-bold" style={{ color: "var(--c-text)" }}>帮帮团正在分析</h1>
         <p className="mt-2 text-sm text-center" style={{ color: "var(--c-text-secondary)" }}>
-          福尔摩斯、{data.session.mode === "parenting" ? "德雷克斯" : "罗杰斯"}和芒格正在综合双方陈述，生成分歧分析报告…
+          {progress
+            ? `正在分析第 ${progress.done}/${progress.total} 项，请稍候…`
+            : `福尔摩斯、${data.session.mode === "parenting" ? "德雷克斯" : "罗杰斯"}和芒格正在综合双方陈述，生成分歧分析报告…`}
         </p>
+        {progress && (
+          <div className="mt-5 w-full max-w-xs">
+            <div className="h-1.5 w-full rounded-full" style={{ background: "rgba(0,0,0,0.08)" }}>
+              <div
+                className="h-1.5 rounded-full"
+                style={{
+                  width: `${Math.round((progress.done / progress.total) * 100)}%`,
+                  background: "var(--c-primary)",
+                  transition: "width 0.6s ease",
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -177,40 +230,58 @@ export default function AnalysisPage() {
           )}
         </div>
 
-        {/* Phase 3: Joint analysis cards */}
+        {/* Phase 3: 核心结论（默认展开） */}
         <div className="space-y-4 mb-8">
           {phase3Cards.map((card) => (
             <div key={card.id} className="clay-card p-5"
                  style={{ background: "var(--c-primary-light)", borderColor: "var(--c-primary-border)" }}>
               <p className="text-sm font-semibold mb-3" style={{ color: "#5A7DB3" }}>{card.title}</p>
-              <Markdown className="text-sm leading-relaxed prose-content">{card.content}</Markdown>
+              <BulletContent content={card.content} />
             </div>
           ))}
         </div>
 
-        {/* Phase 2 cards */}
+        {/* Phase 2 cards：回应分析（默认收起） */}
         {phase2Cards.length > 0 && (
-          <div className="space-y-4 mb-8">
-            <p className="text-sm font-medium" style={{ color: "var(--c-text-muted)" }}>回应分析</p>
-            {phase2Cards.map((card) => (
-              <div key={card.id} className="clay-card p-5">
-                <p className="text-xs font-medium mb-3" style={{ color: "var(--c-text-muted)" }}>{card.title}</p>
-                <Markdown className="text-sm leading-relaxed prose-content">{card.content}</Markdown>
+          <div className="mb-6">
+            <SectionToggle
+              label="回应分析"
+              count={phase2Cards.length}
+              open={showPhase2}
+              onToggle={() => setShowPhase2((v) => !v)}
+            />
+            {showPhase2 && (
+              <div className="space-y-4 mt-3">
+                {phase2Cards.map((card) => (
+                  <div key={card.id} className="clay-card p-5">
+                    <p className="text-xs font-medium mb-3" style={{ color: "var(--c-text-muted)" }}>{card.title}</p>
+                    <BulletContent content={card.content} />
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         )}
 
-        {/* Phase 1 cards */}
+        {/* Phase 1 cards：初始分析（默认收起） */}
         {phase1Cards.length > 0 && (
-          <div className="space-y-4 mb-8">
-            <p className="text-sm font-medium" style={{ color: "var(--c-text-muted)" }}>初始分析</p>
-            {phase1Cards.map((card) => (
-              <div key={card.id} className="clay-card p-5">
-                <p className="text-xs font-medium mb-3" style={{ color: "var(--c-text-muted)" }}>{card.title}</p>
-                <Markdown className="text-sm leading-relaxed prose-content">{card.content}</Markdown>
+          <div className="mb-6">
+            <SectionToggle
+              label="初始分析"
+              count={phase1Cards.length}
+              open={showPhase1}
+              onToggle={() => setShowPhase1((v) => !v)}
+            />
+            {showPhase1 && (
+              <div className="space-y-4 mt-3">
+                {phase1Cards.map((card) => (
+                  <div key={card.id} className="clay-card p-5">
+                    <p className="text-xs font-medium mb-3" style={{ color: "var(--c-text-muted)" }}>{card.title}</p>
+                    <BulletContent content={card.content} />
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         )}
 

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
-import Markdown from "react-markdown";
+import BulletContent from "../components/BulletContent";
 
 interface JudgeCard {
   id: string;
@@ -27,14 +27,33 @@ export default function WaitingPage() {
   const [copied, setCopied] = useState(false);
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [aiError, setAiError] = useState(false);
+  const [lanIp, setLanIp] = useState<string | null>(null);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
-  const inviteLink = `${window.location.origin}/s/${sessionId}`;
+  // 手机上打开 localhost 会指向手机自己，所以邀请链接要用局域网 IP
+  useEffect(() => {
+    fetch("/api/network-info")
+      .then((r) => r.json())
+      .then((d) => setLanIp(d.lanIp ?? null))
+      .catch(() => {});
+  }, []);
+
+  const isLocalhost =
+    window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  const inviteLink =
+    isLocalhost && lanIp
+      ? `${window.location.protocol}//${lanIp}:${window.location.port}/s/${sessionId}`
+      : `${window.location.origin}/s/${sessionId}`;
 
   useEffect(() => {
     const socket = io();
     socketRef.current = socket;
     socket.emit("join-room", sessionId);
+
+    socket.on("analysis-progress", (d: { done: number; total: number }) => {
+      setProgress(d);
+    });
 
     socket.on("phase-change", (data: { phase: string; error?: string }) => {
       if (data.error === "ai_failed") {
@@ -107,8 +126,24 @@ export default function WaitingPage() {
             </div>
             <h1 className="text-2xl font-bold" style={{ color: "var(--c-text)" }}>帮帮团正在分析</h1>
             <p className="mt-2 text-sm" style={{ color: "var(--c-text-secondary)" }}>
-              福尔摩斯和{getConflictResolverName(sessionData?.session.mode || "parenting")}正在阅读你的陈述，请稍候…
+              {progress
+                ? `正在分析第 ${progress.done}/${progress.total} 项，请稍候…`
+                : `福尔摩斯和${getConflictResolverName(sessionData?.session.mode || "parenting")}正在阅读你的陈述，请稍候…`}
             </p>
+            {progress && (
+              <div className="mt-5 mx-auto w-full max-w-xs">
+                <div className="h-1.5 w-full rounded-full" style={{ background: "rgba(0,0,0,0.08)" }}>
+                  <div
+                    className="h-1.5 rounded-full"
+                    style={{
+                      width: `${Math.round((progress.done / progress.total) * 100)}%`,
+                      background: "var(--c-primary)",
+                      transition: "width 0.6s ease",
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="anim-fade-in">
@@ -194,7 +229,7 @@ export default function WaitingPage() {
                 {sessionData.cards.map((card) => (
                   <div key={card.id} className="clay-card p-5">
                     <p className="text-xs font-medium mb-3" style={{ color: "var(--c-text-muted)" }}>{card.title}</p>
-                    <Markdown className="text-sm leading-relaxed prose-content">{card.content}</Markdown>
+                    <BulletContent content={card.content} />
                   </div>
                 ))}
               </div>

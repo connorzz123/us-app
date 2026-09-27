@@ -11,3 +11,5 @@ data/
 .claude/settings.local.json
 SECURITY-PLAN.md
 *.docx
+start-dev.bat
+US-测试文本.md

@@ -13,14 +13,14 @@ import Gate from "./components/Gate";
 type AuthState = "checking" | "locked" | "ok";
 
 // cookie 失效（如 7 天过期/被吊销）后，业务请求会收到 401，
-// 自动刷新页面让 Gate 重新出现，而不是让用户面对莫名的"创建失败"
-function installAuthExpiredInterceptor() {
+// 通知外层切回登录门，而不是整页 reload（reload 会丢失当前输入，表现为"点确认没反应"）
+function installAuthExpiredInterceptor(onExpired: () => void) {
   const originalFetch = window.fetch.bind(window);
   window.fetch = async (...args) => {
     const res = await originalFetch(...args);
     const url = typeof args[0] === "string" ? args[0] : String((args[0] as Request).url);
     if (res.status === 401 && url.includes("/api/sessions")) {
-      window.location.reload();
+      onExpired();
     }
     return res;
   };
@@ -30,7 +30,7 @@ export default function App() {
   const [auth, setAuth] = useState<AuthState>("checking");
 
   useEffect(() => {
-    installAuthExpiredInterceptor();
+    installAuthExpiredInterceptor(() => setAuth("locked"));
     fetch("/api/auth/status")
       .then((r) => r.json())
       .then((data) => setAuth(data.ok ? "ok" : "locked"))

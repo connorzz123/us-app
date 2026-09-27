@@ -73,7 +73,7 @@ export default function CreatePage() {
             <textarea
               value={feeling}
               onChange={(e) => setFeeling(e.target.value)}
-              placeholder="例如：我觉得你总是在孩子面前否定我，让我感觉很孤立…"
+              placeholder="例如：我觉得你总是在别人面前否定我，让我感觉很孤立…"
               className="clay-input min-h-[130px]"
             />
           </div>

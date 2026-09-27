@@ -88,7 +88,9 @@ export function createSessionRouter(io: Server) {
     });
     io.to(session.id).emit("phase-change", { phase: "processing" });
 
-    generatePhase1Cards(fact, feeling, session.mode)
+    generatePhase1Cards(fact, feeling, session.mode, (done, total) => {
+      io.to(session.id).emit("analysis-progress", { done, total });
+    })
       .then((cards) => {
         for (const card of cards) {
           storage.addCard({
@@ -143,12 +145,31 @@ export function createSessionRouter(io: Server) {
 
     const init = session.initiatorStatement;
     if (init) {
-      Promise.all([
-        generatePhase2Cards(init.fact, init.feeling, response, session.mode),
-        generatePhase3Cards(init.fact, init.feeling, response, session.mode),
-      ])
-        .then(([phase2Cards, phase3Cards]) => {
-          const allCards = [...phase2Cards, ...phase3Cards];
+      // 串行执行：并发调用 DeepSeek 容易触发限流，导致部分卡片返回空内容
+      (async () => {
+        let done = 0;
+        const TOTAL = 5;
+        const onProgress = () => {
+          done++;
+          io.to(session.id).emit("analysis-progress", { done, total: TOTAL });
+        };
+        const phase2Cards = await generatePhase2Cards(
+          init.fact,
+          init.feeling,
+          response,
+          session.mode,
+          onProgress
+        );
+        const phase3Cards = await generatePhase3Cards(
+          init.fact,
+          init.feeling,
+          response,
+          session.mode,
+          onProgress
+        );
+        return [...phase2Cards, ...phase3Cards];
+      })()
+        .then((allCards) => {
           for (const card of allCards) {
             storage.addCard({
               ...card,
