@@ -283,9 +283,12 @@ io.on("connection", (socket) => {
   });
 });
 
-// Render 等平台会动态分配端口并通过 PORT 环境变量下发，
-// 写死端口会导致平台找不到服务（表现为返回 Not Found）。
-const PORT = Number(process.env.PORT) || 3001;
+// ⚠️ 2026-09-27 回滚说明：
+// 曾改为 Number(process.env.PORT) || 3001（Render 官方推荐做法），
+// 但该改动会让 Render 检测到"主端口变更"，触发路由重建，
+// 而重建失败导致服务完全不可达（响应头 x-render-routing: no-server）。
+// Render 会自动扫描实例的开放端口，保持监听 3001 即为历史可用状态。
+const PORT = 3001;
 httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`Us server running on http://localhost:${PORT}`);
 });
