@@ -81,6 +81,21 @@ export function getSession(id: string): Session | undefined {
   return db.sessions.find((s) => s.id === id);
 }
 
+/**
+ * 彻底删除一份复盘：会话本体 + 它的所有卡片 + 所有对话消息。
+ * 这是对用户的隐私承诺——删了就真的没了，不留副本。
+ */
+export function deleteSession(id: string): boolean {
+  const db = loadDB();
+  const idx = db.sessions.findIndex((s) => s.id === id);
+  if (idx === -1) return false;
+  db.sessions.splice(idx, 1);
+  db.cards = db.cards.filter((c) => c.sessionId !== id);
+  db.messages = db.messages.filter((m) => m.sessionId !== id);
+  saveDB(db);
+  return true;
+}
+
 export function updateSession(id: string, updates: Partial<Session>): void {
   const db = loadDB();
   const idx = db.sessions.findIndex((s) => s.id === id);

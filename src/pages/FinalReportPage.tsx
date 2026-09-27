@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams, useSearchParams, Link } from "react-router-dom";
+import { useParams, useSearchParams, Link, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import Markdown from "react-markdown";
 
@@ -31,7 +31,24 @@ export default function FinalReportPage() {
   const [shared, setShared] = useState(false);
   const [reminderSet, setReminderSet] = useState(false);
   const [showReminder, setShowReminder] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const failCountRef = useRef(0);
+  const navigate = useNavigate();
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("delete failed");
+      navigate("/", { replace: true });
+    } catch {
+      setDeleteError("删除失败，请稍后重试");
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     const socket = io();
@@ -266,6 +283,57 @@ export default function FinalReportPage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* 隐私：随时可删 */}
+        <div className="mt-8 mb-4">
+          {!confirmDelete ? (
+            <div className="text-center">
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="text-xs transition"
+                style={{
+                  color: "var(--c-text-muted)",
+                  textDecoration: "underline",
+                  textUnderlineOffset: "3px",
+                }}
+              >
+                删除这份复盘
+              </button>
+              <p className="text-xs mt-2" style={{ color: "var(--c-text-muted)" }}>
+                你随时可以删掉它，删了就没了
+              </p>
+            </div>
+          ) : (
+            <div className="clay-card p-5">
+              <p className="text-sm font-medium mb-1.5" style={{ color: "var(--c-text)" }}>
+                确定要删除吗？
+              </p>
+              <p className="text-xs mb-4" style={{ color: "var(--c-text-secondary)", lineHeight: 1.7 }}>
+                双方的陈述、整段对话和这份报告都会一并清掉，无法恢复。
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="clay-btn flex-1 py-2.5 text-sm"
+                  style={{ background: "var(--c-danger)", color: "#fff" }}
+                >
+                  {deleting ? "删除中…" : "确认删除"}
+                </button>
+                <button
+                  onClick={() => { setConfirmDelete(false); setDeleteError(""); }}
+                  disabled={deleting}
+                  className="clay-btn clay-btn-secondary flex-1 py-2.5 text-sm"
+                >
+                  取消
+                </button>
+              </div>
+              {deleteError && (
+                <p className="text-xs mt-3" style={{ color: "var(--c-danger)" }}>{deleteError}</p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Footer link */}

@@ -220,5 +220,17 @@ export function createSessionRouter(io: Server) {
     res.json(updated);
   });
 
+  // 删除这份复盘：双方任何一方都能删，删掉即彻底移除（陈述/卡片/对话/报告）
+  router.delete("/:id", (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    if (!storage.getSession(id)) {
+      res.status(404).json({ error: "session not found" });
+      return;
+    }
+    storage.deleteSession(id);
+    io.to(id).emit("phase-change", { phase: "deleted" });
+    res.json({ ok: true });
+  });
+
   return router;
 }
